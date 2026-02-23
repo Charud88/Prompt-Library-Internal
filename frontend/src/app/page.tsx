@@ -5,11 +5,16 @@ import { PromptCard } from "@/components/shared/PromptCard";
 import { Sparkles, TrendingUp, Clock, ArrowRight, Search, ChevronDown, RefreshCw } from "lucide-react";
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 
 export default function Home() {
   const [selectedCategory, setSelectedCategory] = useState<Category | "">("");
   const [searchQuery, setSearchQuery] = useState("");
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const filteredPrompts = useMemo(() => {
     return MOCK_PROMPTS.filter(prompt => {
@@ -302,7 +307,7 @@ export default function Home() {
       {/* Footer */}
       <div className="pt-8 mt-8" style={{ borderTop: '1px solid var(--border)' }}>
         <p className="text-[10px] tracking-widest opacity-50" style={{ color: 'var(--foreground-muted)' }}>
-          SYSTEM_LOG: DATA_SOURCE_MOCK // {new Date().toISOString()} // CLASSIFIED INTERNAL USE ONLY
+          SYSTEM_LOG: DATA_SOURCE_MOCK // {mounted ? new Date().toISOString() : "2026-02-23T00:00:00.000Z"} // CLASSIFIED INTERNAL USE ONLY
         </p>
       </div>
     </div>
