@@ -1,0 +1,57 @@
+import type { Metadata } from "next";
+import { Geist, Geist_Mono } from "next/font/google";
+import "./globals.css";
+import { ThemeProvider } from "@/components/shared/ThemeProvider";
+import { Navbar } from "@/components/layout/Navbar";
+import { Sidebar } from "@/components/layout/Sidebar";
+import { WarningBanner } from "@/components/layout/WarningBanner";
+import { BRAND_CONFIG } from "@/config/brand.config";
+import { BrowseProvider } from "@/lib/BrowseContext";
+
+const geistSans = Geist({
+  variable: "--font-geist-sans",
+  subsets: ["latin"],
+});
+
+const geistMono = Geist_Mono({
+  variable: "--font-geist-mono",
+  subsets: ["latin"],
+});
+
+export const metadata: Metadata = {
+  title: `${BRAND_CONFIG.name} | ${BRAND_CONFIG.app_name}`,
+  description: BRAND_CONFIG.slogan,
+};
+
+export default function RootLayout({
+  children,
+}: Readonly<{
+  children: React.ReactNode;
+}>) {
+  return (
+    <html lang="en" suppressHydrationWarning>
+      <body
+        suppressHydrationWarning
+        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        style={{ background: 'var(--background)', color: 'var(--foreground)' }}
+      >
+        <ThemeProvider>
+          <BrowseProvider>
+            <div className="flex flex-col min-h-screen">
+              <div className="sticky top-0 z-[60]" style={{ background: 'var(--surface)' }}>
+                <WarningBanner />
+                <Navbar />
+              </div>
+              <div className="flex flex-1 relative">
+                <Sidebar />
+                <main className="flex-1 w-full p-4 md:p-6 lg:p-8 overflow-x-hidden">
+                  {children}
+                </main>
+              </div>
+            </div>
+          </BrowseProvider>
+        </ThemeProvider>
+      </body>
+    </html>
+  );
+}

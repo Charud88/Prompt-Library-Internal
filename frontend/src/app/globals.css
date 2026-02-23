@@ -1,0 +1,251 @@
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700;800&display=swap');
+@import "tailwindcss";
+
+/* ────────────────────────────────
+   Terminal Dark Theme (Default)
+──────────────────────────────── */
+:root {
+  --background: #0d0f0e;
+  --surface: #131615;
+  --surface-2: #1a1d1b;
+  --surface-3: #222622;
+  --foreground: #c9cdd1;
+  --foreground-muted: #5a6066;
+  --primary: #4ade80;
+  --primary-dim: rgba(74, 222, 128, 0.12);
+  --card: #141817;
+  --card-foreground: #c9cdd1;
+  --border: #232927;
+  --border-light: #2d3330;
+  --glass-bg: rgba(20, 24, 23, 0.92);
+  --glass-border: rgba(255, 255, 255, 0.05);
+  --accent-red: #f87171;
+  --accent-yellow: #fbbf24;
+  --accent-blue: #60a5fa;
+}
+
+/* ────────────────────────────────
+   Light Theme (user-toggled)
+──────────────────────────────── */
+[data-theme='light'] {
+  --background: #f0f2f0;
+  --surface: #ffffff;
+  --surface-2: #f5f7f5;
+  --surface-3: #eaece9;
+  --foreground: #1a1f1c;
+  --foreground-muted: #6b7280;
+  --primary: #16a34a;
+  --primary-dim: rgba(22, 163, 74, 0.10);
+  --card: #ffffff;
+  --card-foreground: #1a1f1c;
+  --border: #d1d5d2;
+  --border-light: #e5e7e5;
+  --glass-bg: rgba(255, 255, 255, 0.88);
+  --glass-border: rgba(0, 0, 0, 0.07);
+  --accent-red: #dc2626;
+  --accent-yellow: #d97706;
+  --accent-blue: #2563eb;
+}
+
+[data-theme='dark'] {
+  --background: #0d0f0e;
+  --surface: #131615;
+  --surface-2: #1a1d1b;
+  --surface-3: #222622;
+  --foreground: #c9cdd1;
+  --foreground-muted: #5a6066;
+  --primary: #4ade80;
+  --primary-dim: rgba(74, 222, 128, 0.12);
+  --card: #141817;
+  --card-foreground: #c9cdd1;
+  --border: #232927;
+  --border-light: #2d3330;
+  --glass-bg: rgba(20, 24, 23, 0.92);
+  --glass-border: rgba(255, 255, 255, 0.05);
+  --accent-red: #f87171;
+  --accent-yellow: #fbbf24;
+  --accent-blue: #60a5fa;
+}
+
+/* System fallback */
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme='dark']) {
+    --background: #f0f2f0;
+    --surface: #ffffff;
+    --surface-2: #f5f7f5;
+    --surface-3: #eaece9;
+    --foreground: #1a1f1c;
+    --foreground-muted: #6b7280;
+    --primary: #16a34a;
+    --primary-dim: rgba(22, 163, 74, 0.10);
+    --card: #ffffff;
+    --card-foreground: #1a1f1c;
+    --border: #d1d5d2;
+    --border-light: #e5e7e5;
+    --glass-bg: rgba(255, 255, 255, 0.88);
+    --glass-border: rgba(0, 0, 0, 0.07);
+    --accent-red: #dc2626;
+    --accent-yellow: #d97706;
+    --accent-blue: #2563eb;
+  }
+}
+
+/* ────────────────────────────────
+   Base
+──────────────────────────────── */
+* {
+  box-sizing: border-box;
+  transition: background-color 0.2s ease, border-color 0.2s ease, color 0.15s ease;
+}
+
+html,
+body {
+  font-family: 'JetBrains Mono', 'Courier New', monospace;
+  color: var(--foreground);
+  background: var(--background);
+  overflow-x: hidden;
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+/* ────────────────────────────────
+   Terminal Utilities
+──────────────────────────────── */
+.glass {
+  background: var(--glass-bg);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--glass-border);
+}
+
+.card-surface {
+  background: var(--card);
+  border: 1px solid var(--border);
+}
+
+.surface-panel {
+  background: var(--surface);
+  border: 1px solid var(--border);
+}
+
+/* Terminal label — small, uppercase, letter-spaced */
+.term-label {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--foreground-muted);
+}
+
+/* Stat value — large monospace number */
+.term-value {
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--foreground);
+}
+
+.term-value-positive {
+  color: var(--primary);
+}
+
+.term-value-negative {
+  color: var(--accent-red);
+}
+
+/* Tag chip */
+.term-tag {
+  display: inline-block;
+  padding: 2px 8px;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  border: 1px solid var(--border-light);
+  color: var(--foreground-muted);
+  background: var(--surface-2);
+}
+
+/* Primary tag */
+.term-tag-primary {
+  border-color: var(--primary);
+  color: var(--primary);
+  background: var(--primary-dim);
+}
+
+/* Divider */
+.term-divider {
+  border: none;
+  border-top: 1px solid var(--border);
+  margin: 0;
+}
+
+/* Section header with side rule */
+.term-section-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.term-section-header::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--background);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border-light);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--foreground-muted);
+}
+
+/* ────────────────────────────────
+   Animations
+──────────────────────────────── */
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-slide-up {
+  animation: slideUp 0.35s ease forwards;
+}
+
+@keyframes blink {
+
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0;
+  }
+}
+
+.cursor-blink::after {
+  content: '_';
+  animation: blink 1s step-end infinite;
+  color: var(--primary);
+}
