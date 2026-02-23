@@ -133,7 +133,7 @@ export default function BrowsePage() {
                             <div>
                                 <span className="term-label block mb-3">CATEGORY</span>
                                 <div className="flex flex-wrap gap-1">
-                                    {["All", ...CATEGORIES].map(cat => (
+                                    {(["All", ...CATEGORIES] as (Category | "All")[]).map(cat => (
                                         <button
                                             key={cat}
                                             onClick={() => setSelectedCategory(cat)}
@@ -153,7 +153,7 @@ export default function BrowsePage() {
                             <div>
                                 <span className="term-label block mb-3">DIFFICULTY</span>
                                 <div className="flex flex-wrap gap-1">
-                                    {["All", ...DIFFICULTIES].map(diff => (
+                                    {(["All", ...DIFFICULTIES] as (Difficulty | "All")[]).map(diff => (
                                         <button
                                             key={diff}
                                             onClick={() => setSelectedDifficulty(diff)}
@@ -183,13 +183,13 @@ export default function BrowsePage() {
             </AnimatePresence>
 
             {/* Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 2xl:grid-cols-3 gap-px" style={{ background: 'var(--border)' }}>
+            <div className="grid grid-cols-1 md:grid-cols-2 2xl:grid-cols-3 gap-6">
                 {filteredPrompts.length > 0 ? (
                     filteredPrompts.map(prompt => (
                         <PromptCard key={prompt.id} prompt={prompt} />
                     ))
                 ) : (
-                    <div className="col-span-full py-20 text-center" style={{ background: 'var(--card)' }}>
+                    <div className="col-span-full py-20 text-center border border-dashed border-border rounded-xl">
                         <Search className="h-8 w-8 mx-auto mb-4" style={{ color: 'var(--foreground-muted)' }} />
                         <h3 className="text-sm font-bold mb-1 uppercase tracking-widest" style={{ color: 'var(--foreground)' }}>
                             NO RESULTS FOUND

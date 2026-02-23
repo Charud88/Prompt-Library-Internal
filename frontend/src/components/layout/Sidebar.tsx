@@ -31,7 +31,7 @@ export function Sidebar() {
 
     return (
         <aside
-            className="hidden lg:block w-60 h-[calc(100vh-48px)] sticky top-12 overflow-y-auto shrink-0"
+            className="hidden lg:block w-60 h-[calc(100vh-80px)] sticky top-20 overflow-y-auto shrink-0"
             style={{ background: 'var(--surface)', borderRight: '1px solid var(--border)' }}
         >
             <div className="p-4 space-y-6">

@@ -17,7 +17,7 @@ export function Navbar() {
 
     return (
         <nav
-            className="h-12 sticky top-0 z-[60] px-4 md:px-6 flex items-center justify-between"
+            className="h-12 px-4 md:px-6 flex items-center justify-between"
             style={{
                 background: 'var(--surface)',
                 borderBottom: '1px solid var(--border)',
@@ -66,18 +66,6 @@ export function Navbar() {
 
             {/* Right: Search, Theme, Avatar */}
             <div className="flex items-center gap-3">
-                <div className="hidden md:flex items-center gap-2 px-3 py-1.5 text-xs"
-                    style={{ background: 'var(--surface-2)', border: '1px solid var(--border)' }}
-                >
-                    <Search className="h-3 w-3" style={{ color: 'var(--foreground-muted)' }} />
-                    <input
-                        type="text"
-                        placeholder="SEARCH..."
-                        className="bg-transparent outline-none w-36 text-xs tracking-widest uppercase placeholder:tracking-widest"
-                        style={{ color: 'var(--foreground)', caretColor: 'var(--primary)' }}
-                    />
-                </div>
-
                 <ThemeToggle />
 
                 <div

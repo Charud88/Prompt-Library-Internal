@@ -1,67 +1,75 @@
 "use client";
 
-import { MOCK_PROMPTS } from "@/lib/mock-data";
+import { MOCK_PROMPTS, Category } from "@/lib/mock-data";
 import { PromptCard } from "@/components/shared/PromptCard";
-import { Sparkles, TrendingUp, Clock, ArrowRight } from "lucide-react";
+import { Sparkles, TrendingUp, Clock, ArrowRight, Search, ChevronDown, RefreshCw } from "lucide-react";
 import Link from "next/link";
 import { motion } from "framer-motion";
+import { useState, useMemo } from "react";
 
 export default function Home() {
-  const featuredPrompts = MOCK_PROMPTS.filter(p => p.status === "approved").slice(0, 3);
-  const recentPrompts = [...MOCK_PROMPTS].sort((a, b) => b.created_at.localeCompare(a.created_at)).slice(0, 3);
-  const mostUsedPrompts = MOCK_PROMPTS.slice(0, 4);
+  const [selectedCategory, setSelectedCategory] = useState<Category | "">("");
+  const [searchQuery, setSearchQuery] = useState("");
+
+  const filteredPrompts = useMemo(() => {
+    return MOCK_PROMPTS.filter(prompt => {
+      const matchesCategory = !selectedCategory || prompt.category.includes(selectedCategory as Category);
+      const matchesSearch = !searchQuery ||
+        prompt.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        prompt.use_case.toLowerCase().includes(searchQuery.toLowerCase());
+      return matchesCategory && matchesSearch;
+    });
+  }, [selectedCategory, searchQuery]);
+
+  const featuredPrompts = useMemo(() =>
+    filteredPrompts.filter(p => p.status === "approved").slice(0, 3),
+    [filteredPrompts]);
+
+  const recentPrompts = useMemo(() =>
+    [...filteredPrompts].sort((a, b) => b.created_at.localeCompare(a.created_at)).slice(0, 3),
+    [filteredPrompts]);
+
+  const mostUsedPrompts = useMemo(() =>
+    filteredPrompts.slice(0, 4),
+    [filteredPrompts]);
+
+  const handleRefresh = () => {
+    setSelectedCategory("");
+    setSearchQuery("");
+  };
 
   return (
     <div className="space-y-10 animate-slide-up pb-16">
 
-      {/* Hero */}
       <section
-        className="py-10 px-6 relative overflow-hidden"
+        className="py-8 px-6 relative overflow-hidden"
         style={{ border: '1px solid var(--border)', background: 'var(--surface)' }}
       >
-        {/* Terminal cursor decoration */}
-        <div className="mb-6 flex items-center gap-2">
-          <span className="text-xs tracking-widest" style={{ color: 'var(--foreground-muted)' }}>
-            // DIGIT88 INTERNAL RESOURCE
-          </span>
-          <span className="h-px flex-1" style={{ background: 'var(--border)' }} />
-          <motion.span
-            initial={{ opacity: 0, scale: 0.8 }}
-            animate={{ opacity: 1, scale: 1 }}
-            className="text-[10px] font-bold tracking-widest px-2 py-0.5"
-            style={{
-              border: '1px solid var(--primary)',
-              color: 'var(--primary)',
-              background: 'var(--primary-dim)',
-            }}
+        {/* Header Content: Centered Title and Subtitle */}
+        <div className="flex flex-col items-center text-center mb-6">
+          <motion.h1
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="text-2xl md:text-3xl font-bold tracking-tight leading-tight mb-3"
+            style={{ color: 'var(--foreground)', letterSpacing: '-0.02em' }}
           >
-            LIVE
-          </motion.span>
+            <span style={{ color: 'var(--primary)' }}>D88</span> PROMPT LIBRARY
+          </motion.h1>
+
+          <p
+            className="text-xs max-w-2xl tracking-wide mx-auto"
+            style={{ color: 'var(--foreground-muted)' }}
+          >
+            Explore our curated collection of AI prompts to enhance your interactions and boost productivity.
+            Check out <em>My Prompts</em> to save and reuse your favorite prompts!
+          </p>
         </div>
 
-        <motion.h1
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1 }}
-          className="text-3xl md:text-5xl font-bold tracking-tight mb-4 leading-tight"
-          style={{ color: 'var(--foreground)', letterSpacing: '-0.02em' }}
-        >
-          PROMPT LIBRARY<br />
-          <span style={{ color: 'var(--primary)' }}>/ GENERATIVE AI</span>
-        </motion.h1>
-
-        <p
-          className="text-sm max-w-xl mb-8 tracking-wide"
-          style={{ color: 'var(--foreground-muted)' }}
-        >
-          A curated library of vetted prompts to supercharge your workflow —
-          from engineering to leadership.
-        </p>
-
-        <div className="flex flex-wrap gap-3">
+        {/* Action Buttons: Pinned to Top Right (Desktop) or as row in mobile */}
+        <div className="absolute top-6 right-6 hidden md:flex items-center gap-2">
           <Link
             href="/browse"
-            className="px-5 py-2.5 text-xs font-bold tracking-widest uppercase transition-colors"
+            className="flex items-center gap-2 px-3 py-1.5 text-[9px] font-bold tracking-widest uppercase transition-colors rounded-lg"
             style={{
               background: 'var(--primary)',
               color: '#0d0f0e',
@@ -71,45 +79,142 @@ export default function Home() {
           </Link>
           <Link
             href="/submit"
-            className="px-5 py-2.5 text-xs font-bold tracking-widest uppercase transition-colors"
+            className="flex items-center gap-2 px-3 py-1.5 text-[9px] font-bold tracking-widest uppercase transition-colors rounded-lg"
             style={{
               border: '1px solid var(--border)',
               color: 'var(--foreground-muted)',
+              background: 'var(--surface-2)',
             }}
           >
             SUBMIT PROMPT
           </Link>
         </div>
 
+        {/* Mobile Action Buttons (Visible only on small screens) */}
+        <div className="md:hidden flex flex-wrap justify-center gap-2 mb-6">
+          <Link
+            href="/browse"
+            className="flex items-center gap-2 px-4 py-2 text-[10px] font-bold tracking-widest uppercase transition-colors rounded-lg"
+            style={{
+              background: 'var(--primary)',
+              color: '#0d0f0e',
+            }}
+          >
+            BROWSE LIBRARY →
+          </Link>
+          <Link
+            href="/submit"
+            className="flex items-center gap-2 px-4 py-2 text-[10px] font-bold tracking-widest uppercase transition-colors rounded-lg"
+            style={{
+              border: '1px solid var(--border)',
+              color: 'var(--foreground-muted)',
+              background: 'var(--surface-2)',
+            }}
+          >
+            SUBMIT PROMPT
+          </Link>
+        </div>
+
+        {/* Search Bar */}
+        <div className="w-full max-w-2xl mx-auto mb-6">
+          <div
+            className="flex items-center gap-3 px-4 py-2.5 rounded-xl border transition-all"
+            style={{
+              background: 'var(--surface-2)',
+              borderColor: 'var(--border)',
+              boxShadow: '0 4px 12px rgba(0,0,0,0.05)'
+            }}
+          >
+            <Search className="h-4 w-4" style={{ color: 'var(--foreground-muted)' }} />
+            <input
+              type="text"
+              placeholder="Search prompts..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="bg-transparent outline-none w-full text-sm tracking-wide placeholder:text-muted-foreground/40"
+              style={{ color: 'var(--foreground)', caretColor: 'var(--primary)' }}
+            />
+          </div>
+        </div>
+
+        {/* Filters Row */}
+        <div className="flex flex-wrap justify-center items-center gap-3">
+          <div className="relative group">
+            <select
+              value={selectedCategory}
+              className="appearance-none px-6 py-2 rounded-xl text-[10px] font-bold tracking-widest uppercase cursor-pointer outline-none transition-all pr-12"
+              style={{
+                background: 'var(--surface-2)',
+                border: '1px solid var(--border)',
+                color: 'var(--foreground)',
+              }}
+              onChange={(e) => setSelectedCategory(e.target.value as Category | "")}
+            >
+              <option value="">All Categories</option>
+              {[
+                "Engineering",
+                "QA / Testing",
+                "Product",
+                "Design / UX",
+                "Marketing",
+                "Sales",
+                "Customer Support",
+                "HR / Internal Ops",
+                "Leadership / Strategy"
+              ].map(cat => (
+                <option key={cat} value={cat}>{cat}</option>
+              ))}
+            </select>
+            <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none">
+              <ChevronDown className="h-3 w-3" style={{ color: 'var(--foreground-muted)' }} />
+            </div>
+          </div>
+
+          <button
+            onClick={handleRefresh}
+            className="flex items-center gap-2 px-6 py-2 rounded-xl text-[10px] font-bold tracking-widest uppercase transition-all"
+            style={{
+              background: 'var(--surface-2)',
+              border: '1px solid var(--border)',
+              color: 'var(--foreground)',
+            }}
+          >
+            <RefreshCw className="h-3 w-3" />
+            Refresh
+          </button>
+        </div>
+
         {/* Background decoration */}
         <div
-          className="absolute right-0 top-0 text-[200px] font-black select-none pointer-events-none leading-none"
-          style={{ color: 'var(--border)', opacity: 0.4 }}
+          className="absolute right-4 bottom-0 text-[120px] font-black select-none pointer-events-none leading-none -mb-8"
+          style={{ color: 'var(--border)', opacity: 0.08 }}
         >
           D88
         </div>
       </section>
 
-      {/* Stats row */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-px" style={{ background: 'var(--border)' }}>
-        {[
-          { label: 'TOTAL PROMPTS', value: MOCK_PROMPTS.length, color: 'var(--foreground)' },
-          { label: 'APPROVED', value: MOCK_PROMPTS.filter(p => p.status === 'approved').length, color: 'var(--primary)' },
-          { label: 'PENDING REVIEW', value: MOCK_PROMPTS.filter(p => p.status === 'pending').length, color: 'var(--accent-yellow)' },
-          { label: 'CATEGORIES', value: 9, color: 'var(--accent-blue)' },
-        ].map(stat => (
-          <div key={stat.label} className="px-5 py-4" style={{ background: 'var(--card)' }}>
-            <div className="term-label mb-1">{stat.label}</div>
-            <div className="text-2xl font-bold" style={{ color: stat.color }}>{stat.value}</div>
+      {/* Results Count Info */}
+      {(selectedCategory || searchQuery) && (
+        <div className="px-6 flex items-center justify-between border-b border-border pb-4">
+          <div className="text-xs font-bold tracking-widest text-muted-foreground uppercase">
+            Showing {filteredPrompts.length} results for:
+            {selectedCategory && <span className="text-primary ml-2">{selectedCategory}</span>}
+            {searchQuery && <span className="text-primary ml-2">"{searchQuery}"</span>}
           </div>
-        ))}
-      </div>
+          <button
+            onClick={handleRefresh}
+            className="text-[10px] font-bold text-primary hover:underline uppercase tracking-widest"
+          >
+            Clear Filters
+          </button>
+        </div>
+      )}
 
-      {/* Featured */}
+      {/* FEATURED: Only show if NOT filtering or if items match */}
       {featuredPrompts.length > 0 && (
         <section>
-          <div className="term-section-header mb-4">
-            <span className="term-label flex items-center gap-1.5">
+          <div className="term-section-header mb-4 px-2">
+            <span className="term-label flex items-center gap-1.5 font-bold">
               <Sparkles className="h-3 w-3" style={{ color: 'var(--accent-yellow)' }} />
               FEATURED SELECTION
             </span>
@@ -121,7 +226,7 @@ export default function Home() {
               VIEW ALL <ArrowRight className="h-3 w-3" />
             </Link>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-px" style={{ background: 'var(--border)' }}>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {featuredPrompts.map(prompt => (
               <PromptCard key={prompt.id} prompt={prompt} />
             ))}
@@ -129,16 +234,16 @@ export default function Home() {
         </section>
       )}
 
-      {/* Trending */}
-      {mostUsedPrompts.length > 0 && (
+      {/* TRENDING: Only show if NOT filtering or if items match */}
+      {mostUsedPrompts.length > 0 && !selectedCategory && !searchQuery && (
         <section>
-          <div className="term-section-header mb-4">
-            <span className="term-label flex items-center gap-1.5">
+          <div className="term-section-header mb-4 px-2">
+            <span className="term-label flex items-center gap-1.5 font-bold">
               <TrendingUp className="h-3 w-3" style={{ color: 'var(--accent-blue)' }} />
               TRENDING INTERNAL
             </span>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-px" style={{ background: 'var(--border)' }}>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {mostUsedPrompts.map(prompt => (
               <PromptCard key={prompt.id} prompt={prompt} />
             ))}
@@ -146,16 +251,16 @@ export default function Home() {
         </section>
       )}
 
-      {/* Recently Added */}
-      {recentPrompts.length > 0 && (
+      {/* RECENTLY ADDED: Only show if filtering OR if not already saturated */}
+      {recentPrompts.length > 0 && (selectedCategory || searchQuery) && (
         <section>
-          <div className="term-section-header mb-4">
-            <span className="term-label flex items-center gap-1.5">
+          <div className="term-section-header mb-4 px-2">
+            <span className="term-label flex items-center gap-1.5 font-bold">
               <Clock className="h-3 w-3" style={{ color: 'var(--primary)' }} />
-              RECENTLY ADDED
+              SEARCH RESULTS
             </span>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-px" style={{ background: 'var(--border)' }}>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {recentPrompts.map(prompt => (
               <PromptCard key={prompt.id} prompt={prompt} />
             ))}
@@ -163,10 +268,41 @@ export default function Home() {
         </section>
       )}
 
+      {/* Default RECENTLY ADDED (when not filtering) */}
+      {recentPrompts.length > 0 && !selectedCategory && !searchQuery && (
+        <section>
+          <div className="term-section-header mb-4 px-2">
+            <span className="term-label flex items-center gap-1.5 font-bold">
+              <Clock className="h-3 w-3" style={{ color: 'var(--primary)' }} />
+              RECENTLY ADDED
+            </span>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {recentPrompts.map(prompt => (
+              <PromptCard key={prompt.id} prompt={prompt} />
+            ))}
+          </div>
+        </section>
+      )}
+
+      {/* No Results Fallback */}
+      {filteredPrompts.length === 0 && (
+        <div className="py-20 text-center border border-dashed border-border rounded-xl">
+          <div className="term-label mb-2 font-bold tracking-[0.2em]">NO PROMPTS FOUND</div>
+          <p className="text-sm text-foreground-muted">Try adjusting your filters or search terms.</p>
+          <button
+            onClick={handleRefresh}
+            className="mt-8 px-8 py-3 bg-primary text-black text-xs font-bold uppercase tracking-widest rounded-lg transition-transform hover:scale-105 active:scale-95"
+          >
+            RESET ALL FILTERS
+          </button>
+        </div>
+      )}
+
       {/* Footer */}
-      <div className="pt-4" style={{ borderTop: '1px solid var(--border)' }}>
-        <p className="text-[10px] tracking-widest" style={{ color: 'var(--foreground-muted)' }}>
-          DATA: MOCK DATABASE — {new Date().toISOString().split('T')[0]} — DIGIT88 INTERNAL
+      <div className="pt-8 mt-8" style={{ borderTop: '1px solid var(--border)' }}>
+        <p className="text-[10px] tracking-widest opacity-50" style={{ color: 'var(--foreground-muted)' }}>
+          SYSTEM_LOG: DATA_SOURCE_MOCK // {new Date().toISOString()} // CLASSIFIED INTERNAL USE ONLY
         </p>
       </div>
     </div>

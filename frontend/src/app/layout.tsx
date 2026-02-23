@@ -38,11 +38,11 @@ export default function RootLayout({
         <ThemeProvider>
           <BrowseProvider>
             <div className="flex flex-col min-h-screen">
-              <div className="sticky top-0 z-[60]" style={{ background: 'var(--surface)' }}>
+              <header className="fixed top-0 left-0 w-full z-[60]" style={{ background: 'var(--surface)' }}>
                 <WarningBanner />
                 <Navbar />
-              </div>
-              <div className="flex flex-1 relative">
+              </header>
+              <div className="flex flex-1 pt-20 relative">
                 <Sidebar />
                 <main className="flex-1 w-full p-4 md:p-6 lg:p-8 overflow-x-hidden">
                   {children}
