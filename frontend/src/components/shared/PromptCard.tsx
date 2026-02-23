@@ -1,10 +1,11 @@
 "use client";
 
 import Link from "next/link";
-import { Copy, User, ExternalLink, Sparkles, Check } from "lucide-react";
+import { Copy, User, ExternalLink, Sparkles, Check, Bookmark, BookmarkCheck } from "lucide-react";
 import { Prompt } from "@/lib/mock-data";
 import { useState } from "react";
 import { motion } from "framer-motion";
+import { useBookmarks } from "@/lib/BookmarkContext";
 
 interface PromptCardProps {
     prompt: Prompt;
@@ -18,6 +19,8 @@ const DIFFICULTY_STYLE: Record<string, { color: string; label: string }> = {
 
 export function PromptCard({ prompt }: PromptCardProps) {
     const [copied, setCopied] = useState(false);
+    const { toggleBookmark, isBookmarked } = useBookmarks();
+    const bookmarked = isBookmarked(prompt.id);
     const diff = DIFFICULTY_STYLE[prompt.difficulty] ?? DIFFICULTY_STYLE.Beginner;
 
     const handleCopy = (e: React.MouseEvent) => {
@@ -26,6 +29,12 @@ export function PromptCard({ prompt }: PromptCardProps) {
         navigator.clipboard.writeText(prompt.prompt_text);
         setCopied(true);
         setTimeout(() => setCopied(false), 2000);
+    };
+
+    const handleBookmark = (e: React.MouseEvent) => {
+        e.preventDefault();
+        e.stopPropagation();
+        toggleBookmark(prompt.id);
     };
 
     return (
@@ -96,6 +105,21 @@ export function PromptCard({ prompt }: PromptCardProps) {
                         <span className="text-[10px] tracking-wider" style={{ color: 'var(--foreground-muted)' }}>
                             v{prompt.version}
                         </span>
+                        <button
+                            onClick={handleBookmark}
+                            className="p-1.5 transition-colors"
+                            style={{
+                                color: bookmarked ? 'var(--accent-yellow)' : 'var(--foreground-muted)',
+                                background: bookmarked ? 'rgba(251, 191, 36, 0.12)' : 'transparent',
+                            }}
+                            title={bookmarked ? "Remove Bookmark" : "Bookmark Prompt"}
+                        >
+                            {bookmarked ? (
+                                <BookmarkCheck className="h-3.5 w-3.5" />
+                            ) : (
+                                <Bookmark className="h-3.5 w-3.5" />
+                            )}
+                        </button>
                         <button
                             onClick={handleCopy}
                             className="p-1.5 transition-colors"

@@ -1,8 +1,9 @@
-import { Home, Compass, PlusCircle, ShieldCheck, History } from "lucide-react";
+import { Home, Compass, PlusCircle, ShieldCheck, History, Bookmark } from "lucide-react";
 
 export const NAV_ITEMS = [
     { name: "Home", href: "/", icon: Home },
     { name: "Browse", href: "/browse", icon: Compass },
+    { name: "Library", href: "/library", icon: Bookmark },
     { name: "Submit", href: "/submit", icon: PlusCircle },
 ];
 

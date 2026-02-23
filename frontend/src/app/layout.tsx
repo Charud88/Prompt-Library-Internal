@@ -7,6 +7,7 @@ import { Sidebar } from "@/components/layout/Sidebar";
 import { WarningBanner } from "@/components/layout/WarningBanner";
 import { BRAND_CONFIG } from "@/config/brand.config";
 import { BrowseProvider } from "@/lib/BrowseContext";
+import { BookmarkProvider } from "@/lib/BookmarkContext";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -37,18 +38,20 @@ export default function RootLayout({
       >
         <ThemeProvider>
           <BrowseProvider>
-            <div className="flex flex-col min-h-screen">
-              <header className="fixed top-0 left-0 w-full z-[60]" style={{ background: 'var(--surface)' }}>
-                <WarningBanner />
-                <Navbar />
-              </header>
-              <div className="flex flex-1 pt-20 relative">
-                <Sidebar />
-                <main className="flex-1 w-full p-4 md:p-6 lg:p-8 overflow-x-hidden">
-                  {children}
-                </main>
+            <BookmarkProvider>
+              <div className="flex flex-col min-h-screen">
+                <header className="fixed top-0 left-0 w-full z-[60]" style={{ background: 'var(--surface)' }}>
+                  <WarningBanner />
+                  <Navbar />
+                </header>
+                <div className="flex flex-1 pt-20 relative">
+                  <Sidebar />
+                  <main className="flex-1 w-full p-4 md:p-6 lg:p-8 overflow-x-hidden">
+                    {children}
+                  </main>
+                </div>
               </div>
-            </div>
+            </BookmarkProvider>
           </BrowseProvider>
         </ThemeProvider>
       </body>
