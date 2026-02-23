@@ -38,20 +38,15 @@ export function PromptCard({ prompt }: PromptCardProps) {
     };
 
     return (
-        <motion.div
-            whileHover={{ y: -2 }}
-            transition={{ type: "spring", stiffness: 400 }}
-        >
+        <div>
             <Link
                 href={`/prompts/${prompt.id}`}
-                className="block group relative h-full flex flex-col transition-colors"
+                className="block group relative h-full flex flex-col"
                 style={{
                     background: 'var(--card)',
                     border: '1px solid var(--border)',
                     padding: '16px',
                 }}
-                onMouseEnter={e => (e.currentTarget.style.borderColor = 'var(--primary)')}
-                onMouseLeave={e => (e.currentTarget.style.borderColor = 'var(--border)')}
             >
                 {/* Top row: categories + difficulty */}
                 <div className="flex items-start justify-between gap-2 mb-3">
@@ -145,6 +140,6 @@ export function PromptCard({ prompt }: PromptCardProps) {
                     </div>
                 )}
             </Link>
-        </motion.div>
+        </div>
     );
 }
