@@ -23,7 +23,28 @@ export function createClient() {
     }
 
     if (!supabase) {
-        supabase = createBrowserClient<Database>(url, key);
+        supabase = createBrowserClient<Database>(url, key, {
+            global: {
+                fetch: async (fetchUrl, options) => {
+                    // Adblocker fallback: Some browsers (Brave) block network requests
+                    // but don't fail immediately, holding the `navigator.locks` lock forever.
+                    const controller = new AbortController();
+                    const timeoutId = setTimeout(() => controller.abort(), 3000);
+
+                    try {
+                        const response = await fetch(fetchUrl, {
+                            ...options,
+                            signal: controller.signal,
+                        });
+                        clearTimeout(timeoutId);
+                        return response;
+                    } catch (err) {
+                        clearTimeout(timeoutId);
+                        throw err;
+                    }
+                },
+            },
+        });
     }
 
     return supabase;

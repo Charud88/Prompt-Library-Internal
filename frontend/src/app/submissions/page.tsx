@@ -11,38 +11,27 @@ export default function MySubmissionsPage() {
     const [user, setUser] = useState<any>(null);
     useEffect(() => {
         const fetchSubmissions = async () => {
+            const supabase = createClient();
             try {
-                const supabase = createClient();
-                // Adblocker/Brave browser fallback: 
-                // If the auth cookie request is blocked and hangs, force resolve after 3s
-                const fetchSession = async () => {
-                    const { data: { session } } = await supabase.auth.getSession();
-                    if (!session) {
-                        setLoading(false);
-                        return;
-                    }
-                    setUser(session.user);
-
-                    const { data, error } = await supabase
-                        .from("prompts")
-                        .select("*")
-                        .eq("owner_id", session.user.id)
-                        .order("created_at", { ascending: false });
-
-                    if (!error && data) {
-                        setPrompts(data);
-                    }
+                const { data: { session } } = await supabase.auth.getSession();
+                if (!session) {
                     setLoading(false);
-                };
+                    return;
+                }
+                setUser(session.user);
 
-                const timeout = new Promise((_, reject) =>
-                    setTimeout(() => reject(new Error("Auth request timed out (Adblocker likely)")), 3000)
-                );
+                const { data, error } = await supabase
+                    .from("prompts")
+                    .select("*")
+                    .eq("owner_id", session.user.id)
+                    .order("created_at", { ascending: false });
 
-                await Promise.race([fetchSession(), timeout]);
+                if (!error && data) {
+                    setPrompts(data);
+                }
             } catch (err) {
-                console.warn(err);
-                // Fail gracefully so the UI doesn't freeze
+                console.warn("[Submissions] Auth/Fetch Error:", err);
+            } finally {
                 setLoading(false);
             }
         };
