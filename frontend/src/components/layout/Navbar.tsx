@@ -6,14 +6,54 @@ import { BRAND_CONFIG } from "@/config/brand.config";
 import { NAV_ITEMS, ADMIN_ITEMS } from "@/config/navigation";
 import { ThemeToggle } from "./ThemeToggle";
 import { Search, User, Menu, X } from "lucide-react";
-import { useState } from "react";
+import { AuthButton } from "../auth/AuthButton";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { createClient } from "@/lib/supabase/client";
 
 export function Navbar() {
     const pathname = usePathname();
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+    const [isAdmin, setIsAdmin] = useState(false);
+    const supabase = createClient();
 
-    const allItems = [...NAV_ITEMS, ...ADMIN_ITEMS];
+    useEffect(() => {
+        const checkRole = async () => {
+            const { data: { session } } = await supabase.auth.getSession();
+            const user = session?.user;
+
+            if (!user) {
+                setIsAdmin(false);
+                return;
+            }
+
+            const { data: profile, error } = await (supabase
+                .from("profiles")
+                .select("*")
+                .eq("id", user.id)
+                .maybeSingle() as any);
+
+            const is_admin = profile?.role === "admin";
+            setIsAdmin(is_admin);
+        };
+
+        checkRole();
+
+        // Listen for auth changes
+        const { data: { subscription } } = supabase.auth.onAuthStateChange(
+            async (event, _session) => {
+                if (event === "SIGNED_OUT") {
+                    setIsAdmin(false);
+                } else {
+                    await checkRole();
+                }
+            }
+        );
+
+        return () => subscription.unsubscribe();
+    }, [supabase]);
+
+    const allItems = isAdmin ? [...NAV_ITEMS, ...ADMIN_ITEMS] : NAV_ITEMS;
 
     return (
         <nav
@@ -68,12 +108,7 @@ export function Navbar() {
             <div className="flex items-center gap-3">
                 <ThemeToggle />
 
-                <div
-                    className="h-6 w-6 flex items-center justify-center cursor-pointer"
-                    style={{ color: 'var(--foreground-muted)' }}
-                >
-                    <User className="h-4 w-4" />
-                </div>
+                <AuthButton />
 
                 {/* Mobile Toggle */}
                 <button

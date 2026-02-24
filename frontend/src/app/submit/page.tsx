@@ -1,16 +1,17 @@
 "use client";
 
-import { useState } from "react";
-import { Category, Difficulty } from "@/lib/mock-data";
+import { useEffect, useState } from "react";
 import { BackButton } from "@/components/shared/BackButton";
-import { Save, Send, AlertCircle, CheckCircle2 } from "lucide-react";
+import { Save, Send, AlertCircle, CheckCircle2, LogIn, Loader2 } from "lucide-react";
+import { createClient } from "@/lib/supabase/client";
+import { type PromptDifficulty } from "@/lib/supabase/types";
 
-const CATEGORIES: Category[] = [
+const CATEGORIES: string[] = [
     "Engineering", "QA / Testing", "Product", "Design / UX",
     "Marketing", "Sales", "Customer Support", "HR / Internal Ops", "Leadership / Strategy"
 ];
 
-const DIFFICULTIES: Difficulty[] = ["Beginner", "Intermediate", "Advanced"];
+const DIFFICULTIES: string[] = ["Beginner", "Intermediate", "Advanced"];
 
 const inputStyle = {
     background: 'var(--surface-2)',
@@ -34,21 +35,43 @@ const labelStyle = {
 };
 
 export default function SubmitPromptPage() {
+    const [user, setUser] = useState<any>(null);
+    const [authLoading, setAuthLoading] = useState(true);
     const [formData, setFormData] = useState({
         title: "",
-        category: [] as Category[],
+        category: [] as string[],
         role: "",
         use_case: "",
         prompt_text: "",
         model_compatibility: "",
-        difficulty: "Beginner" as Difficulty,
+        difficulty: "Beginner" as any,
     });
+
+    const supabase = createClient();
+
+    useEffect(() => {
+        const checkUser = async () => {
+            const { data: { session } } = await supabase.auth.getSession();
+            setUser(session?.user ?? null);
+            setAuthLoading(false);
+        };
+        checkUser();
+    }, [supabase.auth]);
+
+    const handleLogin = async () => {
+        await supabase.auth.signInWithOAuth({
+            provider: "google",
+            options: {
+                redirectTo: `${window.location.origin}/api/auth/callback?next=/submit`,
+            },
+        });
+    };
 
     const [submitted, setSubmitted] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [submitting, setSubmitting] = useState(false);
 
-    const handleCategoryToggle = (cat: Category) => {
+    const handleCategoryToggle = (cat: string) => {
         setFormData(prev => ({
             ...prev,
             category: prev.category.includes(cat)
@@ -85,6 +108,14 @@ export default function SubmitPromptPage() {
                 setError(json.error ?? "Sign in with your Digit88 account to submit prompts.");
                 return;
             }
+            if (res.status === 422 && json.details) {
+                // Flatten the Zod errors into a readable string
+                const details = Object.entries(json.details)
+                    .map(([field, msgs]: any) => `${field.toUpperCase()}: ${msgs.join(", ")}`)
+                    .join(" | ");
+                setError(`Validation failed: ${details}`);
+                return;
+            }
             if (!res.ok) {
                 setError(json.error ?? "Submission failed. Please try again.");
                 return;
@@ -97,6 +128,40 @@ export default function SubmitPromptPage() {
             setSubmitting(false);
         }
     };
+
+    if (authLoading) {
+        return (
+            <div className="flex flex-col items-center justify-center py-40 gap-4">
+                <Loader2 className="h-8 w-8 animate-spin" style={{ color: 'var(--primary)' }} />
+                <div className="text-[10px] font-bold tracking-widest uppercase opacity-50">Checking Authorization...</div>
+            </div>
+        );
+    }
+
+    if (!user) {
+        return (
+            <div className="max-w-2xl mx-auto py-20 text-center">
+                <div className="w-16 h-16 mx-auto mb-6 flex items-center justify-center rounded-full" style={{ background: 'var(--surface-2)', border: '1px solid var(--border)' }}>
+                    <LogIn className="h-6 w-6" style={{ color: 'var(--foreground-muted)' }} />
+                </div>
+                <div className="term-label mb-2 text-red-500">ACCESS DENIED</div>
+                <h2 className="text-2xl font-bold mb-3" style={{ color: 'var(--foreground)', letterSpacing: '-0.02em' }}>
+                    SIGN IN REQUIRED
+                </h2>
+                <p className="text-sm mb-10" style={{ color: 'var(--foreground-muted)' }}>
+                    You must be signed in with a Digit88 account to contribute to the prompt library.
+                </p>
+                <button
+                    onClick={handleLogin}
+                    className="flex lg:inline-flex items-center justify-center gap-2 px-8 py-3 text-xs font-bold tracking-widest uppercase"
+                    style={{ background: 'var(--primary)', color: '#0d0f0e' }}
+                >
+                    <LogIn className="h-4 w-4" />
+                    SIGN IN WITH GOOGLE
+                </button>
+            </div>
+        );
+    }
 
     if (submitted) {
         return (
@@ -210,7 +275,7 @@ export default function SubmitPromptPage() {
                             <select
                                 style={{ ...inputStyle, cursor: 'pointer' }}
                                 value={formData.difficulty}
-                                onChange={e => setFormData({ ...formData, difficulty: e.target.value as Difficulty })}
+                                onChange={e => setFormData({ ...formData, difficulty: e.target.value as PromptDifficulty })}
                             >
                                 {DIFFICULTIES.map(diff => (
                                     <option key={diff} value={diff} style={{ background: 'var(--surface-2)' }}>{diff}</option>

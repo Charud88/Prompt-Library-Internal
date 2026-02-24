@@ -70,7 +70,12 @@ export type Database = {
             };
             prompts: {
                 Row: Prompt;
-                Insert: Omit<Prompt, "id" | "created_at" | "updated_at">;
+                Insert: Omit<Prompt, "id" | "created_at" | "updated_at" | "version" | "deleted_at" | "role" | "use_case"> & {
+                    version?: string;
+                    deleted_at?: string | null;
+                    role?: string | null;
+                    use_case?: string | null;
+                };
                 Update: Partial<Omit<Prompt, "id" | "owner_id" | "created_at">>;
             };
             audit_log: {
@@ -80,7 +85,7 @@ export type Database = {
             };
             bookmarks: {
                 Row: Bookmark;
-                Insert: Bookmark;
+                Insert: Omit<Bookmark, "created_at"> & { created_at?: string };
                 Update: never; // Create or delete only
             };
         };

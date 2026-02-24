@@ -3,20 +3,13 @@
  *
  * POST /api/prompts
  * Handles prompt submission from the submit form.
- *
- * Security contracts:
- * - Validates all input fields with Zod before touching the database
- * - owner_id is set from auth session (NOT from request body — prevents IDOR)
- * - status is hardcoded to 'pending' (client cannot self-approve)
- * - Uses service_role client on the server only
- * - Returns 401 if user is not authenticated
- *
- * NOTE: Auth check is a TODO placeholder until Supabase Google OAuth is implemented.
- * Once auth is in place, replace the TODO block with real session validation.
  */
 
 import { NextResponse } from "next/server";
 import { z } from "zod";
+import { createServerClient } from "@supabase/ssr";
+import { cookies } from "next/headers";
+import type { Database } from "@/lib/supabase/types";
 
 // Input validation schema — mirrors DB constraints
 const SubmitPromptSchema = z.object({
@@ -47,28 +40,46 @@ const SubmitPromptSchema = z.object({
 });
 
 export async function POST(request: Request) {
-    // ----------------------------------------------------------------
-    // TODO: Supabase Auth check — implement when Google OAuth is done
-    // Replace this block with:
-    //
-    // const { createServiceClient } = await import("@/lib/supabase/server");
-    // const supabase = createServiceClient();
-    // const { data: { user } } = await supabase.auth.getUser(bearerToken);
-    // if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    // if (!user.email?.endsWith("@digit88.com")) {
-    //     return NextResponse.json({ error: "Only @digit88.com accounts can submit prompts." }, { status: 403 });
-    // }
-    // ----------------------------------------------------------------
-    return NextResponse.json(
-        { error: "Authentication required. Please sign in with your Digit88 account to submit prompts." },
-        { status: 401 }
+    const cookieStore = await cookies();
+    const supabase = createServerClient<Database>(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+        {
+            cookies: {
+                getAll() {
+                    return cookieStore.getAll();
+                },
+                setAll(cookiesToSet) {
+                    try {
+                        cookiesToSet.forEach(({ name, value, options }) =>
+                            cookieStore.set(name, value, options)
+                        );
+                    } catch {
+                        // ignore if called from server component
+                    }
+                },
+            },
+        }
     );
 
-    // ----------------------------------------------------------------
-    // The code below is ready to execute once auth is in place.
-    // Uncomment when removing the early return above.
-    // ----------------------------------------------------------------
-    /*
+    // Get the user from the session
+    const { data: { user } } = await supabase.auth.getUser();
+
+    if (!user) {
+        return NextResponse.json(
+            { error: "Authentication required. Please sign in with your Digit88 account." },
+            { status: 401 }
+        );
+    }
+
+    // Security Contract: Domain restriction check
+    if (!user.email?.endsWith("@digit88.com")) {
+        return NextResponse.json(
+            { error: "Only @digit88.com accounts can submit prompts." },
+            { status: 403 }
+        );
+    }
+
     let body: unknown;
     try {
         body = await request.json();
@@ -84,16 +95,24 @@ export async function POST(request: Request) {
         );
     }
 
-    const { createServiceClient } = await import("@/lib/supabase/server");
-    const supabase = createServiceClient();
+    // Cast the insertion object to any as a last resort for TS resolution issues
+    // but keep it structured correctly for the DB.
+    const insertData: any = {
+        title: parsed.data.title,
+        category: parsed.data.category,
+        role: parsed.data.role || null,
+        use_case: parsed.data.use_case || null,
+        prompt_text: parsed.data.prompt_text,
+        model_compatibility: parsed.data.model_compatibility,
+        difficulty: parsed.data.difficulty,
+        owner_id: user.id,
+        status: "pending",
+        version: "1.0.0",
+    };
 
     const { data, error } = await supabase
         .from("prompts")
-        .insert({
-            ...parsed.data,
-            owner_id: user.id,  // Always from auth session, NEVER from body
-            status: "pending",  // Client can never self-approve
-        })
+        .insert(insertData)
         .select("id")
         .single();
 
@@ -103,5 +122,4 @@ export async function POST(request: Request) {
     }
 
     return NextResponse.json({ id: data.id }, { status: 201 });
-    */
 }

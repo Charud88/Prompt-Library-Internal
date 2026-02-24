@@ -53,23 +53,33 @@ function adaptPrompt(p: Record<string, any>): Prompt {
 export async function fetchApprovedPrompts(): Promise<Prompt[]> {
     const supabase = createClient();
 
-    const { data, error } = await supabase
+    const { data, error } = await (supabase
         .from("prompts")
-        .select(PUBLIC_COLUMNS)
+        .select(`
+            ${PUBLIC_COLUMNS},
+            profiles:owner_id (display_name)
+        `)
         .eq("status", "approved")
         .is("deleted_at", null)
-        .order("created_at", { ascending: false });
+        .order("created_at", { ascending: false }) as any);
 
     if (error) {
         console.error("[fetchApprovedPrompts]", error.message);
         return [];
     }
 
-    return (data ?? []).map(adaptPrompt);
+    return (data ?? []).map((p: any) => {
+        const adapted = adaptPrompt(p);
+        if (p.profiles && !Array.isArray(p.profiles)) {
+            adapted.owner = (p.profiles as any).display_name || "Unknown";
+        }
+        return adapted;
+    });
 }
 
 /**
- * Fetch a single approved prompt by ID.
+ * Fetch a single prompt by ID.
+ * Security: Uses RLS — non-admins will only see approved prompts.
  * ID is validated as a UUID — returns null if invalid or not found.
  * Used by Prompt Detail page.
  */
@@ -81,18 +91,28 @@ export async function fetchPromptById(id: string): Promise<Prompt | null> {
 
     const supabase = createClient();
 
-    const { data, error } = await supabase
+    const { data, error } = await (supabase
         .from("prompts")
-        .select(PUBLIC_COLUMNS)
+        .select(`
+            ${PUBLIC_COLUMNS},
+            profiles:owner_id (display_name)
+        `)
         .eq("id", id)
-        .eq("status", "approved")
         .is("deleted_at", null)
-        .maybeSingle();
+        .maybeSingle() as any);
 
     if (error) {
         console.error("[fetchPromptById]", error.message);
         return null;
     }
 
-    return data ? adaptPrompt(data) : null;
+    if (!data) return null;
+
+    const adapted = adaptPrompt(data);
+    // Extract display name from join result
+    if (data.profiles && !Array.isArray(data.profiles)) {
+        adapted.owner = (data.profiles as any).display_name || "Unknown";
+    }
+
+    return adapted;
 }

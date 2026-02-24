@@ -1,58 +1,105 @@
 "use client";
 
-import { createContext, useContext, useState, useEffect, ReactNode } from "react";
+import { createContext, useContext, useState, useEffect, ReactNode, useCallback } from "react";
+import { createClient } from "./supabase/client";
+import type { Database } from "./supabase/types";
+
+const STORAGE_KEY = "d88_bookmarks";
 
 interface BookmarkContextType {
     bookmarks: string[];
-    toggleBookmark: (id: string) => void;
+    toggleBookmark: (id: string) => Promise<void>;
     isBookmarked: (id: string) => boolean;
 }
 
 const BookmarkContext = createContext<BookmarkContextType | undefined>(undefined);
 
-const STORAGE_KEY = "d88_bookmarks";
-
 export function BookmarkProvider({ children }: { children: ReactNode }) {
     const [bookmarks, setBookmarks] = useState<string[]>([]);
-    const [loaded, setLoaded] = useState(false);
+    const [user, setUser] = useState<any>(null);
+    const supabase = createClient();
 
-    // Load from localStorage on mount
+    // 1. Listen for Auth Changes
     useEffect(() => {
-        try {
-            const stored = localStorage.getItem(STORAGE_KEY);
-            if (stored) {
-                const parsed = JSON.parse(stored);
-                if (
-                    Array.isArray(parsed) &&
-                    parsed.every((item: unknown) => typeof item === "string")
-                ) {
-                    setBookmarks(parsed);
-                } else {
+        const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+            setUser(session?.user ?? null);
+        });
+        return () => subscription.unsubscribe();
+    }, [supabase.auth]);
+
+    // 2. Load Bookmarks (Hybrid)
+    useEffect(() => {
+        const loadBookmarks = async () => {
+            if (user) {
+                // Load from Supabase
+                const { data, error } = await supabase
+                    .from("bookmarks")
+                    .select("prompt_id");
+
+                if (!error && data) {
+                    setBookmarks(data.map(b => (b as any).prompt_id));
+                }
+            } else {
+                // Load from LocalStorage for guests
+                try {
+                    const stored = localStorage.getItem(STORAGE_KEY);
+                    if (stored) {
+                        const parsed = JSON.parse(stored);
+                        if (Array.isArray(parsed) && parsed.every(i => typeof i === "string")) {
+                            setBookmarks(parsed);
+                        }
+                    }
+                } catch {
                     localStorage.removeItem(STORAGE_KEY);
                 }
             }
-        } catch {
-            localStorage.removeItem(STORAGE_KEY);
-        }
-        setLoaded(true);
-    }, []);
+        };
 
-    // Persist to localStorage on change (skip initial load)
+        loadBookmarks();
+    }, [user, supabase]);
+
+    // 3. Persist Guest Bookmarks to LocalStorage
     useEffect(() => {
-        if (loaded) {
+        if (!user) {
             try {
                 localStorage.setItem(STORAGE_KEY, JSON.stringify(bookmarks));
-            } catch {
-                // Silently fail
+            } catch { /* ignore */ }
+        }
+    }, [bookmarks, user]);
+
+    const toggleBookmark = useCallback(async (id: string) => {
+        const alreadyBookmarked = bookmarks.includes(id);
+
+        // Optimistic UI update
+        setBookmarks(prev =>
+            alreadyBookmarked ? prev.filter(b => b !== id) : [...prev, id]
+        );
+
+        if (user) {
+            if (alreadyBookmarked) {
+                const { error } = await supabase
+                    .from("bookmarks")
+                    .delete()
+                    .match({ user_id: user.id, prompt_id: id });
+
+                if (error) {
+                    console.error("Failed to remove bookmark", error);
+                    // Rollback
+                    setBookmarks(prev => [...prev, id]);
+                }
+            } else {
+                const { error } = await supabase
+                    .from("bookmarks")
+                    .insert({ user_id: user.id, prompt_id: id } as any);
+
+                if (error) {
+                    console.error("Failed to add bookmark", error);
+                    // Rollback
+                    setBookmarks(prev => prev.filter(b => b !== id));
+                }
             }
         }
-    }, [bookmarks, loaded]);
-
-    const toggleBookmark = (id: string) => {
-        setBookmarks(prev =>
-            prev.includes(id) ? prev.filter(b => b !== id) : [...prev, id]
-        );
-    };
+    }, [bookmarks, user, supabase]);
 
     const isBookmarked = (id: string) => bookmarks.includes(id);
 
