@@ -86,6 +86,7 @@ export default function SubmitPromptPage() {
 
         if (!formData.title || !formData.prompt_text || formData.category.length === 0) {
             setError("REQUIRED FIELDS: Title, Category, Prompt Text");
+            window.scrollTo({ top: 0, behavior: 'smooth' });
             return;
         }
 
@@ -114,6 +115,7 @@ export default function SubmitPromptPage() {
                     .map(([field, msgs]: any) => `${field.toUpperCase()}: ${msgs.join(", ")}`)
                     .join(" | ");
                 setError(`Validation failed: ${details}`);
+                window.scrollTo({ top: 0, behavior: 'smooth' });
                 return;
             }
             if (!res.ok) {
@@ -176,7 +178,18 @@ export default function SubmitPromptPage() {
                 </p>
                 <div className="flex justify-center gap-3">
                     <button
-                        onClick={() => setSubmitted(false)}
+                        onClick={() => {
+                            setSubmitted(false);
+                            setFormData({
+                                title: "",
+                                category: [],
+                                role: "",
+                                use_case: "",
+                                prompt_text: "",
+                                model_compatibility: "",
+                                difficulty: "Beginner",
+                            });
+                        }}
                         className="px-5 py-2 text-xs font-semibold tracking-widest uppercase transition-colors"
                         style={{ border: '1px solid var(--border)', color: 'var(--foreground-muted)' }}
                     >
@@ -320,16 +333,7 @@ export default function SubmitPromptPage() {
                         />
                     </div>
 
-                    {/* Actions */}
                     <div className="p-5 flex items-center justify-end gap-3">
-                        <button
-                            type="button"
-                            className="flex items-center gap-1.5 px-4 py-2 text-xs font-semibold tracking-widest uppercase transition-colors"
-                            style={{ border: '1px solid var(--border)', color: 'var(--foreground-muted)' }}
-                        >
-                            <Save className="h-3.5 w-3.5" />
-                            SAVE DRAFT
-                        </button>
                         <button
                             type="submit"
                             disabled={submitting}
