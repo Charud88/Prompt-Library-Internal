@@ -51,9 +51,14 @@ export default function SubmitPromptPage() {
 
     useEffect(() => {
         const checkUser = async () => {
-            const { data: { session } } = await supabase.auth.getSession();
-            setUser(session?.user ?? null);
-            setAuthLoading(false);
+            try {
+                const { data: { session } } = await supabase.auth.getSession();
+                setUser(session?.user ?? null);
+            } catch (err) {
+                console.error("[SubmitPage] checkUser error:", err);
+            } finally {
+                setAuthLoading(false);
+            }
         };
         checkUser();
     }, [supabase.auth]);
