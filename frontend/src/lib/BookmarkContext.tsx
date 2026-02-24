@@ -17,7 +17,7 @@ const BookmarkContext = createContext<BookmarkContextType | undefined>(undefined
 export function BookmarkProvider({ children }: { children: ReactNode }) {
     const [bookmarks, setBookmarks] = useState<string[]>([]);
     const [user, setUser] = useState<any>(null);
-    const supabase = createClient();
+    const [supabase] = useState(() => createClient());
 
     // 1. Listen for Auth Changes
     useEffect(() => {
@@ -27,11 +27,41 @@ export function BookmarkProvider({ children }: { children: ReactNode }) {
         return () => subscription.unsubscribe();
     }, [supabase.auth]);
 
-    // 2. Load Bookmarks (Hybrid)
+    // 2. Load Bookmarks (Hybrid w/ Merge)
     useEffect(() => {
         const loadBookmarks = async () => {
             if (user) {
-                // Load from Supabase
+                // Check if there are local bookmarks to merge first
+                let localBookmarksToMerge: string[] = [];
+                try {
+                    const stored = localStorage.getItem(STORAGE_KEY);
+                    if (stored) {
+                        const parsed = JSON.parse(stored);
+                        if (Array.isArray(parsed) && parsed.every(i => typeof i === "string")) {
+                            localBookmarksToMerge = parsed;
+                        }
+                    }
+                } catch { /* ignore */ }
+
+                // Merge local into DB if they exist
+                if (localBookmarksToMerge.length > 0) {
+                    const inserts = localBookmarksToMerge.map(id => ({
+                        user_id: user.id,
+                        prompt_id: id
+                    }));
+
+                    // Insert ignoring duplicates (on conflict do nothing)
+                    // Note: Supabase JS doesn't expose onConflict easily for simple inserts without declaring the constraint, 
+                    // so we do standard insert. RLS or unique constraint will throw 23505 on dupes which we can just ignore.
+                    for (const insert of inserts) {
+                        await supabase.from("bookmarks").insert(insert as any).then(({ error }: any) => {
+                            if (error && error.code !== '23505') console.error("Migration error:", error)
+                        })
+                    }
+                    localStorage.removeItem(STORAGE_KEY);
+                }
+
+                // Load Final from Supabase
                 const { data, error } = await supabase
                     .from("bookmarks")
                     .select("prompt_id");
@@ -83,7 +113,7 @@ export function BookmarkProvider({ children }: { children: ReactNode }) {
                     .match({ user_id: user.id, prompt_id: id });
 
                 if (error) {
-                    console.error("Failed to remove bookmark", error);
+                    console.error("[BookmarkContext] Failed to remove bookmark in db:", error);
                     // Rollback
                     setBookmarks(prev => [...prev, id]);
                 }
@@ -93,9 +123,14 @@ export function BookmarkProvider({ children }: { children: ReactNode }) {
                     .insert({ user_id: user.id, prompt_id: id } as any);
 
                 if (error) {
-                    console.error("Failed to add bookmark", error);
+                    console.error("[BookmarkContext] Failed to add bookmark in db:", error);
                     // Rollback
                     setBookmarks(prev => prev.filter(b => b !== id));
+
+                    if (error.code === '23505') {
+                        // Already exists in DB - silent recover
+                        setBookmarks(prev => [...prev, id]);
+                    }
                 }
             }
         }

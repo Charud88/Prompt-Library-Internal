@@ -47,7 +47,7 @@ export default function SubmitPromptPage() {
         difficulty: "Beginner" as any,
     });
 
-    const supabase = createClient();
+    const [supabase] = useState(() => createClient());
 
     useEffect(() => {
         const checkUser = async () => {

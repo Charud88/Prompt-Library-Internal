@@ -9,6 +9,7 @@ import { useBookmarks } from "@/lib/BookmarkContext";
 
 interface PromptCardProps {
     prompt: Prompt;
+    showStatus?: boolean;
 }
 
 const DIFFICULTY_STYLE: Record<string, { color: string; label: string }> = {
@@ -17,7 +18,7 @@ const DIFFICULTY_STYLE: Record<string, { color: string; label: string }> = {
     Advanced: { color: 'var(--accent-red)', label: 'ADV' },
 };
 
-export function PromptCard({ prompt }: PromptCardProps) {
+export function PromptCard({ prompt, showStatus }: PromptCardProps) {
     const [copied, setCopied] = useState(false);
     const { toggleBookmark, isBookmarked } = useBookmarks();
     const bookmarked = isBookmarked(prompt.id);
@@ -50,13 +51,31 @@ export function PromptCard({ prompt }: PromptCardProps) {
             >
                 {/* Top row: categories + difficulty */}
                 <div className="flex items-start justify-between gap-2 mb-3">
-                    <div className="flex flex-wrap gap-1">
+                    <div className="flex flex-wrap items-center gap-1.5">
                         {prompt.category.map((cat) => (
                             <span key={cat} className="term-tag term-tag-primary">{cat}</span>
                         ))}
+                        {showStatus && (prompt as any).status && (
+                            <span
+                                className="px-2 py-0.5 text-[9px] font-bold tracking-widest uppercase rounded shadow-sm"
+                                style={{
+                                    background: (prompt as any).status === "approved" ? "rgba(16, 185, 129, 0.15)" :
+                                        (prompt as any).status === "rejected" ? "rgba(244, 63, 94, 0.15)" :
+                                            "rgba(251, 191, 36, 0.15)",
+                                    color: (prompt as any).status === "approved" ? "#10b981" :
+                                        (prompt as any).status === "rejected" ? "#f43f5e" :
+                                            "#fbbf24",
+                                    border: `1px solid ${(prompt as any).status === "approved" ? "rgba(16, 185, 129, 0.3)" :
+                                        (prompt as any).status === "rejected" ? "rgba(244, 63, 94, 0.3)" :
+                                            "rgba(251, 191, 36, 0.3)"}`
+                                }}
+                            >
+                                {(prompt as any).status}
+                            </span>
+                        )}
                     </div>
                     <span
-                        className="text-[10px] font-bold tracking-widest shrink-0"
+                        className="text-[10px] font-bold tracking-widest shrink-0 mt-0.5"
                         style={{ color: diff.color }}
                     >
                         {diff.label}

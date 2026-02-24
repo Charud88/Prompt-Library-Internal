@@ -1,19 +1,37 @@
 "use client";
 
-import { useMemo } from "react";
-import { MOCK_PROMPTS } from "@/lib/mock-data";
+import { useMemo, useState, useEffect } from "react";
+import { type Prompt } from "@/lib/mock-data";
+import { fetchApprovedPrompts } from "@/lib/data/prompts";
 import { PromptCard } from "@/components/shared/PromptCard";
 import { useBookmarks } from "@/lib/BookmarkContext";
-import { Bookmark, ArrowRight } from "lucide-react";
+import { Bookmark, ArrowRight, Loader2 } from "lucide-react";
 import Link from "next/link";
 
 export default function LibraryPage() {
     const { bookmarks } = useBookmarks();
+    const [allPrompts, setAllPrompts] = useState<Prompt[]>([]);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        fetchApprovedPrompts()
+            .then(setAllPrompts)
+            .finally(() => setLoading(false));
+    }, []);
 
     const bookmarkedPrompts = useMemo(() =>
-        MOCK_PROMPTS.filter(p => bookmarks.includes(p.id)),
-        [bookmarks]
+        allPrompts.filter(p => bookmarks.includes(p.id)),
+        [allPrompts, bookmarks]
     );
+
+    if (loading) {
+        return (
+            <div className="flex flex-col items-center justify-center py-40 gap-4">
+                <Loader2 className="h-8 w-8 animate-spin" style={{ color: "var(--primary)" }} />
+                <div className="text-[10px] font-bold tracking-widest uppercase opacity-50">Loading Collection...</div>
+            </div>
+        );
+    }
 
     return (
         <div className="space-y-6 animate-slide-up">

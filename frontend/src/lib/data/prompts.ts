@@ -51,30 +51,24 @@ function adaptPrompt(p: Record<string, any>): Prompt {
  * Returns [] on error — never throws.
  */
 export async function fetchApprovedPrompts(): Promise<Prompt[]> {
-    const supabase = createClient();
-
-    const { data, error } = await (supabase
-        .from("prompts")
-        .select(`
-            ${PUBLIC_COLUMNS},
-            profiles:owner_id (display_name)
-        `)
-        .eq("status", "approved")
-        .is("deleted_at", null)
-        .order("created_at", { ascending: false }) as any);
-
-    if (error) {
-        console.error("[fetchApprovedPrompts]", error.message);
+    try {
+        const res = await fetch('/api/prompts');
+        if (!res.ok) {
+            console.error("[fetchApprovedPrompts] Status:", res.status);
+            return [];
+        }
+        const data = await res.json();
+        return (data.prompts || []).map((p: any) => {
+            const adapted = adaptPrompt(p);
+            if (p.profiles && !Array.isArray(p.profiles)) {
+                adapted.owner = (p.profiles as any).display_name || "Unknown";
+            }
+            return adapted;
+        });
+    } catch (error: any) {
+        console.error("[fetchApprovedPrompts]", error.message || error);
         return [];
     }
-
-    return (data ?? []).map((p: any) => {
-        const adapted = adaptPrompt(p);
-        if (p.profiles && !Array.isArray(p.profiles)) {
-            adapted.owner = (p.profiles as any).display_name || "Unknown";
-        }
-        return adapted;
-    });
 }
 
 /**

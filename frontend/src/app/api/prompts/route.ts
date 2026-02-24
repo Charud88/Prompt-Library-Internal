@@ -11,6 +11,43 @@ import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
 import type { Database } from "@/lib/supabase/types";
 
+// Only select columns the UI needs — never expose owner_id or deleted_at to components
+const PUBLIC_COLUMNS =
+    "id, title, category, role, use_case, prompt_text, model_compatibility, difficulty, status, version, created_at, updated_at";
+
+export async function GET() {
+    const cookieStore = await cookies();
+    const supabase = createServerClient<Database>(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+        {
+            cookies: {
+                getAll() {
+                    return cookieStore.getAll();
+                },
+                setAll() { }
+            },
+        }
+    );
+
+    const { data, error } = await supabase
+        .from("prompts")
+        .select(`
+            ${PUBLIC_COLUMNS},
+            profiles:owner_id (display_name)
+        `)
+        .eq("status", "approved")
+        .is("deleted_at", null)
+        .order("created_at", { ascending: false });
+
+    if (error) {
+        console.error("[GET /api/prompts]", error.message);
+        return NextResponse.json({ error: "Failed to fetch prompts" }, { status: 500 });
+    }
+
+    return NextResponse.json({ prompts: data }, { status: 200 });
+}
+
 // Input validation schema — mirrors DB constraints
 const SubmitPromptSchema = z.object({
     title: z
@@ -121,5 +158,5 @@ export async function POST(request: Request) {
         return NextResponse.json({ error: "Failed to submit prompt. Please try again." }, { status: 500 });
     }
 
-    return NextResponse.json({ id: data.id }, { status: 201 });
+    return NextResponse.json({ id: (data as any)?.id }, { status: 201 });
 }
