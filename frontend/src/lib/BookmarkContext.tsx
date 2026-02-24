@@ -21,10 +21,18 @@ export function BookmarkProvider({ children }: { children: ReactNode }) {
         try {
             const stored = localStorage.getItem(STORAGE_KEY);
             if (stored) {
-                setBookmarks(JSON.parse(stored));
+                const parsed = JSON.parse(stored);
+                if (
+                    Array.isArray(parsed) &&
+                    parsed.every((item: unknown) => typeof item === "string")
+                ) {
+                    setBookmarks(parsed);
+                } else {
+                    localStorage.removeItem(STORAGE_KEY);
+                }
             }
         } catch {
-            // Silently fail — localStorage may be unavailable
+            localStorage.removeItem(STORAGE_KEY);
         }
         setLoaded(true);
     }, []);

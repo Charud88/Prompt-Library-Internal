@@ -18,9 +18,15 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     const [mounted, setMounted] = useState(false);
 
     useEffect(() => {
-        const savedTheme = localStorage.getItem("theme") as Theme | null;
-        if (savedTheme) {
-            setThemeState(savedTheme);
+        try {
+            const savedTheme = localStorage.getItem("theme");
+            if (savedTheme && ["light", "dark", "system"].includes(savedTheme)) {
+                setThemeState(savedTheme as Theme);
+            } else if (savedTheme) {
+                localStorage.removeItem("theme");
+            }
+        } catch {
+            // localStorage may be unavailable
         }
         setMounted(true);
     }, []);
