@@ -1,7 +1,8 @@
 "use client";
 
-import { useMemo, useState } from "react";
-import { MOCK_PROMPTS, Category, Difficulty } from "@/lib/mock-data";
+import { useMemo, useState, useEffect } from "react";
+import { type Prompt, Category, Difficulty } from "@/lib/mock-data";
+import { fetchApprovedPrompts } from "@/lib/data/prompts";
 import { PromptCard } from "@/components/shared/PromptCard";
 import { Search, Filter, X, SlidersHorizontal } from "lucide-react";
 import { useBrowse } from "@/lib/BrowseContext";
@@ -22,9 +23,17 @@ export default function BrowsePage() {
     } = useBrowse();
 
     const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
+    const [prompts, setPrompts] = useState<Prompt[]>([]);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        fetchApprovedPrompts()
+            .then(setPrompts)
+            .finally(() => setLoading(false));
+    }, []);
 
     const filteredPrompts = useMemo(() => {
-        return MOCK_PROMPTS.filter(prompt => {
+        return prompts.filter((prompt: Prompt) => {
             const matchesSearch =
                 prompt.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
                 prompt.use_case.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -35,7 +44,21 @@ export default function BrowsePage() {
 
             return matchesSearch && matchesCategory && matchesDifficulty;
         });
-    }, [searchQuery, selectedCategory, selectedDifficulty]);
+    }, [prompts, searchQuery, selectedCategory, selectedDifficulty]);
+
+    // Show loading skeleton while fetching
+    if (loading) {
+        return (
+            <div className="space-y-6 animate-slide-up">
+                <div className="term-label">LOADING PROMPTS...</div>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {Array.from({ length: 6 }).map((_, i) => (
+                        <div key={i} className="h-48 rounded-xl animate-pulse" style={{ background: 'var(--surface-2)' }} />
+                    ))}
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="space-y-6 animate-slide-up">

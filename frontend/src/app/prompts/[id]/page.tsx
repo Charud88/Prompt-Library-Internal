@@ -1,16 +1,35 @@
 "use client";
 
 import { useParams } from "next/navigation";
-import { MOCK_PROMPTS } from "@/lib/mock-data";
+import { type Prompt } from "@/lib/mock-data";
+import { fetchPromptById } from "@/lib/data/prompts";
 import { BackButton } from "@/components/shared/BackButton";
 import { Copy, User, Calendar, Check, ThumbsUp, ThumbsDown, Info, ShieldAlert } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 export default function PromptDetailPage() {
     const { id } = useParams();
-    const prompt = MOCK_PROMPTS.find(p => p.id === id);
+    const [prompt, setPrompt] = useState<Prompt | null>(null);
+    const [loading, setLoading] = useState(true);
     const [copied, setCopied] = useState(false);
     const [feedback, setFeedback] = useState<"useful" | "not-useful" | null>(null);
+
+    useEffect(() => {
+        if (!id) return;
+        fetchPromptById(id as string)
+            .then(setPrompt)
+            .finally(() => setLoading(false));
+    }, [id]);
+
+    // Loading skeleton
+    if (loading) {
+        return (
+            <div className="space-y-6 animate-slide-up">
+                <div className="term-label">LOADING PROMPT...</div>
+                <div className="h-64 rounded-xl animate-pulse" style={{ background: 'var(--surface-2)' }} />
+            </div>
+        );
+    }
 
     if (!prompt) {
         return (

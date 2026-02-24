@@ -1,6 +1,7 @@
 "use client";
 
-import { MOCK_PROMPTS, Category } from "@/lib/mock-data";
+import { type Prompt, Category } from "@/lib/mock-data";
+import { fetchApprovedPrompts } from "@/lib/data/prompts";
 import { PromptCard } from "@/components/shared/PromptCard";
 import { Sparkles, TrendingUp, Clock, ArrowRight, Search, ChevronDown, RefreshCw } from "lucide-react";
 import Link from "next/link";
@@ -11,27 +12,32 @@ export default function Home() {
   const [selectedCategory, setSelectedCategory] = useState<Category | "">("");
   const [searchQuery, setSearchQuery] = useState("");
   const [mounted, setMounted] = useState(false);
+  const [prompts, setPrompts] = useState<Prompt[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     setMounted(true);
+    fetchApprovedPrompts()
+      .then(setPrompts)
+      .finally(() => setLoading(false));
   }, []);
 
   const filteredPrompts = useMemo(() => {
-    return MOCK_PROMPTS.filter(prompt => {
+    return prompts.filter((prompt: Prompt) => {
       const matchesCategory = !selectedCategory || prompt.category.includes(selectedCategory as Category);
       const matchesSearch = !searchQuery ||
         prompt.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
         prompt.use_case.toLowerCase().includes(searchQuery.toLowerCase());
       return matchesCategory && matchesSearch;
     });
-  }, [selectedCategory, searchQuery]);
+  }, [prompts, selectedCategory, searchQuery]);
 
   const featuredPrompts = useMemo(() =>
-    filteredPrompts.filter(p => p.status === "approved").slice(0, 3),
+    filteredPrompts.filter((p: Prompt) => p.status === "approved").slice(0, 3),
     [filteredPrompts]);
 
   const recentPrompts = useMemo(() =>
-    [...filteredPrompts].sort((a, b) => b.created_at.localeCompare(a.created_at)).slice(0, 3),
+    [...filteredPrompts].sort((a: Prompt, b: Prompt) => b.created_at.localeCompare(a.created_at)).slice(0, 3),
     [filteredPrompts]);
 
   const mostUsedPrompts = useMemo(() =>
@@ -307,7 +313,7 @@ export default function Home() {
       {/* Footer */}
       <div className="pt-8 mt-8" style={{ borderTop: '1px solid var(--border)' }}>
         <p className="text-[10px] tracking-widest opacity-50" style={{ color: 'var(--foreground-muted)' }}>
-          SYSTEM_LOG: DATA_SOURCE_MOCK // {mounted ? new Date().toISOString() : "2026-02-23T00:00:00.000Z"} // CLASSIFIED INTERNAL USE ONLY
+          SYSTEM_LOG: DATA_SOURCE_SUPABASE // {mounted ? new Date().toISOString() : "2026-02-24T00:00:00.000Z"} // CLASSIFIED INTERNAL USE ONLY
         </p>
       </div>
     </div>

@@ -46,6 +46,7 @@ export default function SubmitPromptPage() {
 
     const [submitted, setSubmitted] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const [submitting, setSubmitting] = useState(false);
 
     const handleCategoryToggle = (cat: Category) => {
         setFormData(prev => ({
@@ -56,7 +57,7 @@ export default function SubmitPromptPage() {
         }));
     };
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setError(null);
 
@@ -65,8 +66,36 @@ export default function SubmitPromptPage() {
             return;
         }
 
-        console.log("Submitting prompt:", formData);
-        setSubmitted(true);
+        setSubmitting(true);
+        try {
+            const res = await fetch("/api/prompts", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    ...formData,
+                    model_compatibility: formData.model_compatibility
+                        ? formData.model_compatibility.split(",").map((s: string) => s.trim()).filter(Boolean)
+                        : [],
+                }),
+            });
+
+            const json = await res.json();
+
+            if (res.status === 401 || res.status === 403) {
+                setError(json.error ?? "Sign in with your Digit88 account to submit prompts.");
+                return;
+            }
+            if (!res.ok) {
+                setError(json.error ?? "Submission failed. Please try again.");
+                return;
+            }
+
+            setSubmitted(true);
+        } catch {
+            setError("Network error. Please check your connection and try again.");
+        } finally {
+            setSubmitting(false);
+        }
     };
 
     if (submitted) {
@@ -238,11 +267,17 @@ export default function SubmitPromptPage() {
                         </button>
                         <button
                             type="submit"
+                            disabled={submitting}
                             className="flex items-center gap-1.5 px-5 py-2 text-xs font-bold tracking-widest uppercase"
-                            style={{ background: 'var(--primary)', color: '#0d0f0e' }}
+                            style={{
+                                background: submitting ? 'var(--surface-2)' : 'var(--primary)',
+                                color: submitting ? 'var(--foreground-muted)' : '#0d0f0e',
+                                opacity: submitting ? 0.7 : 1,
+                                cursor: submitting ? 'not-allowed' : 'pointer',
+                            }}
                         >
                             <Send className="h-3.5 w-3.5" />
-                            SUBMIT FOR REVIEW
+                            {submitting ? "SUBMITTING..." : "SUBMIT FOR REVIEW"}
                         </button>
                     </div>
                 </div>
