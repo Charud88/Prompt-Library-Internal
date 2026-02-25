@@ -2,7 +2,7 @@
 
 import { Category } from "@/lib/mock-data";
 import { PromptCard, PromptCardSkeleton } from "@/components/shared/PromptCard";
-import { Sparkles, TrendingUp, Clock, ArrowRight, Search, ChevronDown } from "lucide-react";
+import { Sparkles, TrendingUp, Clock, ArrowRight, Search, ChevronDown, Loader2 } from "lucide-react";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { useState, useMemo, useEffect } from "react";
@@ -175,128 +175,125 @@ export default function Home() {
         </div>
       </section>
 
-      {isFiltering && (
-        <div className="px-6 flex items-center justify-between border-b border-border pb-4">
-          <div className="text-xs font-bold tracking-widest text-muted-foreground uppercase">
-            Showing {prompts.length} results for:
-            {selectedCategory && <span className="text-primary ml-2">{selectedCategory}</span>}
-            {searchQuery && <span className="text-primary ml-2">"{searchQuery}"</span>}
-          </div>
-          <button
-            onClick={handleRefresh}
-            className="text-[10px] font-bold text-primary hover:underline uppercase tracking-widest"
-          >
-            Clear Filters
-          </button>
+      {loading ? (
+        <div className="py-20 text-center animate-slide-up bg-card border border-border rounded-xl">
+          <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4" style={{ color: 'var(--primary)' }} />
+          <div className="term-label tracking-[0.2em]">LOADING PROMPTS...</div>
         </div>
-      )}
-
-      {/* FEATURED SELECTION */}
-      {!isFiltering && featuredPrompts.length > 0 && (
-        <section
-          className="p-8 rounded-2xl border mb-10"
-          style={{
-            borderColor: 'var(--border)',
-            background: 'color-mix(in srgb, var(--surface), transparent 40%)',
-            backdropFilter: 'blur(12px)'
-          }}
-        >
-          <div className="term-section-header mb-4 px-2">
-            <span className="term-label flex items-center gap-1.5 font-bold">
-              <Sparkles className="h-3 w-3" style={{ color: 'var(--accent-yellow)' }} />
-              FEATURED SELECTION
-            </span>
-            <Link
-              href="/browse"
-              className="text-[10px] font-bold tracking-widest uppercase flex items-center gap-1 transition-colors hover:underline"
-              style={{ color: 'var(--primary)' }}
-            >
-              VIEW ALL <ArrowRight className="h-3 w-3" />
-            </Link>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {loading ? (
-              Array.from({ length: 3 }).map((_, i) => <PromptCardSkeleton key={i} />)
-            ) : (
-              featuredPrompts.map(prompt => (
-                <PromptCard key={prompt.id} prompt={prompt} />
-              ))
-            )}
-          </div>
-        </section>
-      )}
-
-      {/* TRENDING INTERNAL */}
-      {!isFiltering && mostUsedPrompts.length > 0 && (
-        <section
-          className="p-8 rounded-2xl border mb-10"
-          style={{
-            borderColor: 'var(--border)',
-            background: 'color-mix(in srgb, var(--surface), transparent 40%)',
-            backdropFilter: 'blur(12px)'
-          }}
-        >
-          <div className="term-section-header mb-4 px-2">
-            <span className="term-label flex items-center gap-1.5 font-bold">
-              <TrendingUp className="h-3 w-3" style={{ color: 'var(--accent-blue)' }} />
-              TRENDING INTERNAL
-            </span>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {loading ? (
-              Array.from({ length: 4 }).map((_, i) => <PromptCardSkeleton key={i} />)
-            ) : (
-              mostUsedPrompts.map(prompt => (
-                <PromptCard key={prompt.id} prompt={prompt} />
-              ))
-            )}
-          </div>
-        </section>
-      )}
-
-      {/* MAIN FEED */}
-      <section
-        className="p-8 rounded-2xl border"
-        style={{
-          borderColor: 'var(--border)',
-          background: 'color-mix(in srgb, var(--surface), transparent 40%)',
-          backdropFilter: 'blur(12px)'
-        }}
-      >
-        <div className="term-section-header mb-4 px-2">
-          <span className="term-label flex items-center gap-1.5 font-bold">
-            <Clock className="h-3 w-3" style={{ color: 'var(--primary)' }} />
-            {isFiltering ? "SEARCH RESULTS" : "RECENTLY ADDED"}
-          </span>
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {loading ? (
-            Array.from({ length: 6 }).map((_, i) => <PromptCardSkeleton key={i} />)
-          ) : (
-            recentPrompts.map(prompt => (
-              <PromptCard key={prompt.id} prompt={prompt} />
-            ))
+      ) : (
+        <>
+          {isFiltering && (
+            <div className="px-6 flex items-center justify-between border-b border-border pb-4">
+              <div className="text-xs font-bold tracking-widest text-muted-foreground uppercase">
+                Showing {prompts.length} results for:
+                {selectedCategory && <span className="text-primary ml-2">{selectedCategory}</span>}
+                {searchQuery && <span className="text-primary ml-2">&quot;{searchQuery}&quot;</span>}
+              </div>
+              <button
+                onClick={handleRefresh}
+                className="text-[10px] font-bold text-primary hover:underline uppercase tracking-widest"
+              >
+                Clear Filters
+              </button>
+            </div>
           )}
-        </div>
-      </section>
 
-      {/* No Results Fallback */}
-      {!loading && prompts.length === 0 && (
-        <div className="py-20 text-center border border-dashed border-border rounded-xl">
-          <div className="term-label mb-2 font-bold tracking-[0.2em]">NO PROMPTS FOUND</div>
-          <p className="text-sm text-foreground-muted">Try adjusting your filters or search terms.</p>
-          <button
-            onClick={handleRefresh}
-            className="mt-8 px-8 py-3 bg-primary text-black text-xs font-bold uppercase tracking-widest rounded-lg transition-transform hover:scale-105 active:scale-95"
+          {/* FEATURED SELECTION */}
+          {!isFiltering && featuredPrompts.length > 0 && (
+            <section
+              className="p-8 rounded-2xl border mb-10"
+              style={{
+                borderColor: 'var(--border)',
+                background: 'color-mix(in srgb, var(--surface), transparent 40%)',
+                backdropFilter: 'blur(12px)'
+              }}
+            >
+              <div className="term-section-header mb-4 px-2">
+                <span className="term-label flex items-center gap-1.5 font-bold">
+                  <Sparkles className="h-3 w-3" style={{ color: 'var(--accent-yellow)' }} />
+                  FEATURED SELECTION
+                </span>
+                <Link
+                  href="/browse"
+                  className="text-[10px] font-bold tracking-widest uppercase flex items-center gap-1 transition-colors hover:underline"
+                  style={{ color: 'var(--primary)' }}
+                >
+                  VIEW ALL <ArrowRight className="h-3 w-3" />
+                </Link>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {featuredPrompts.map(prompt => (
+                  <PromptCard key={prompt.id} prompt={prompt} />
+                ))}
+              </div>
+            </section>
+          )}
+
+          {/* TRENDING INTERNAL */}
+          {!isFiltering && mostUsedPrompts.length > 0 && (
+            <section
+              className="p-8 rounded-2xl border mb-10"
+              style={{
+                borderColor: 'var(--border)',
+                background: 'color-mix(in srgb, var(--surface), transparent 40%)',
+                backdropFilter: 'blur(12px)'
+              }}
+            >
+              <div className="term-section-header mb-4 px-2">
+                <span className="term-label flex items-center gap-1.5 font-bold">
+                  <TrendingUp className="h-3 w-3" style={{ color: 'var(--accent-blue)' }} />
+                  TRENDING INTERNAL
+                </span>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                {mostUsedPrompts.map(prompt => (
+                  <PromptCard key={prompt.id} prompt={prompt} />
+                ))}
+              </div>
+            </section>
+          )}
+
+          {/* MAIN FEED */}
+          <section
+            className="p-8 rounded-2xl border"
+            style={{
+              borderColor: 'var(--border)',
+              background: 'color-mix(in srgb, var(--surface), transparent 40%)',
+              backdropFilter: 'blur(12px)'
+            }}
           >
-            RESET ALL FILTERS
-          </button>
-        </div>
+            <div className="term-section-header mb-4 px-2">
+              <span className="term-label flex items-center gap-1.5 font-bold">
+                <Clock className="h-3 w-3" style={{ color: 'var(--primary)' }} />
+                {isFiltering ? "SEARCH RESULTS" : "RECENTLY ADDED"}
+              </span>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {recentPrompts.map(prompt => (
+                <PromptCard key={prompt.id} prompt={prompt} />
+              ))}
+            </div>
+          </section>
+
+          {/* No Results Fallback */}
+          {prompts.length === 0 && (
+            <div className="py-20 text-center border border-dashed border-border rounded-xl">
+              <div className="term-label mb-2 font-bold tracking-[0.2em]">NO PROMPTS FOUND</div>
+              <p className="text-sm text-foreground-muted">Try adjusting your filters or search terms.</p>
+              <button
+                onClick={handleRefresh}
+                className="mt-8 px-8 py-3 bg-primary text-black text-xs font-bold uppercase tracking-widest rounded-lg transition-transform hover:scale-105 active:scale-95"
+              >
+                RESET ALL FILTERS
+              </button>
+            </div>
+          )}
+        </>
       )}
 
       <div className="pt-8 mt-8" style={{ borderTop: '1px solid var(--border)' }}>
         <p className="text-[10px] tracking-widest opacity-50" style={{ color: 'var(--foreground-muted)' }}>
-          SYSTEM_LOG: DATA_SOURCE_SUPABASE // {mounted ? new Date().toISOString() : "2026-02-24T00:00:00.000Z"} // CLASSIFIED INTERNAL USE ONLY
+          SYSTEM_LOG: DATA_SOURCE_SUPABASE {"//"} {mounted ? new Date().toISOString() : "2026-02-24T00:00:00.000Z"} {"//"} CLASSIFIED INTERNAL USE ONLY
         </p>
       </div>
     </div>
