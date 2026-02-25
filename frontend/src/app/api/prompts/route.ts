@@ -22,7 +22,9 @@ export async function GET(request: Request) {
     const difficulty = searchParams.get("difficulty");
     const search = searchParams.get("search");
     const page = parseInt(searchParams.get("page") || "1", 10);
-    const limit = parseInt(searchParams.get("limit") || "12", 10);
+    // Security Fix: Cap the maximum limit to prevent database exhaustion (DoS protection)
+    const requestedLimit = parseInt(searchParams.get("limit") || "12", 10);
+    const limit = Math.min(requestedLimit, 50);
 
     const from = (page - 1) * limit;
     const to = from + limit - 1;
