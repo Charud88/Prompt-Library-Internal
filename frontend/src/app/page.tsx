@@ -1,50 +1,47 @@
 "use client";
 
-import { type Prompt, Category } from "@/lib/mock-data";
-import { fetchApprovedPrompts } from "@/lib/data/prompts";
+import { Category } from "@/lib/mock-data";
 import { PromptCard, PromptCardSkeleton } from "@/components/shared/PromptCard";
-import { Skeleton } from "@/components/shared/Skeleton";
 import { Sparkles, TrendingUp, Clock, ArrowRight, Search, ChevronDown, RefreshCw } from "lucide-react";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { useState, useMemo, useEffect } from "react";
-import { InfiniteGrid } from "@/components/ui/the-infinite-grid";
 
 export default function Home() {
   const [selectedCategory, setSelectedCategory] = useState<Category | "">("");
   const [searchQuery, setSearchQuery] = useState("");
   const [mounted, setMounted] = useState(false);
-  const [prompts, setPrompts] = useState<Prompt[]>([]);
+  const [prompts, setPrompts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+
+  const fetchPrompts = async () => {
+    setLoading(true);
+    try {
+      const params = new URLSearchParams();
+      if (selectedCategory) params.append("category", selectedCategory);
+      if (searchQuery) params.append("search", searchQuery);
+
+      const res = await fetch(`/api/prompts?${params.toString()}`);
+      const data = await res.json();
+      setPrompts(data.prompts || []);
+    } catch (err) {
+      console.error("Failed to fetch prompts:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
     setMounted(true);
-    fetchApprovedPrompts()
-      .then(setPrompts)
-      .finally(() => setLoading(false));
-  }, []);
+    fetchPrompts();
+  }, [selectedCategory, searchQuery]);
 
-  const filteredPrompts = useMemo(() => {
-    return prompts.filter((prompt: Prompt) => {
-      const matchesCategory = !selectedCategory || prompt.category.includes(selectedCategory as Category);
-      const matchesSearch = !searchQuery ||
-        prompt.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        prompt.use_case.toLowerCase().includes(searchQuery.toLowerCase());
-      return matchesCategory && matchesSearch;
-    });
-  }, [prompts, selectedCategory, searchQuery]);
+  const isFiltering = !!selectedCategory || !!searchQuery;
 
-  const featuredPrompts = useMemo(() =>
-    filteredPrompts.filter((p: Prompt) => p.status === "approved").slice(0, 3),
-    [filteredPrompts]);
-
-  const recentPrompts = useMemo(() =>
-    [...filteredPrompts].sort((a: Prompt, b: Prompt) => b.created_at.localeCompare(a.created_at)).slice(0, 3),
-    [filteredPrompts]);
-
-  const mostUsedPrompts = useMemo(() =>
-    filteredPrompts.slice(0, 4),
-    [filteredPrompts]);
+  // Sections for the "Default" view
+  const featuredPrompts = useMemo(() => isFiltering ? [] : prompts.slice(0, 3), [isFiltering, prompts]);
+  const mostUsedPrompts = useMemo(() => isFiltering ? [] : prompts.slice(3, 7), [isFiltering, prompts]);
+  const recentPrompts = useMemo(() => isFiltering ? prompts : prompts.slice(0, 6), [isFiltering, prompts]);
 
   const handleRefresh = () => {
     setSelectedCategory("");
@@ -61,7 +58,6 @@ export default function Home() {
           backdropFilter: 'blur(12px)'
         }}
       >
-        {/* Header Content: Centered Title and Subtitle */}
         <div className="flex flex-col items-center text-center mb-6">
           <motion.h1
             initial={{ opacity: 0, y: 10 }}
@@ -81,15 +77,11 @@ export default function Home() {
           </p>
         </div>
 
-        {/* Action Buttons: Pinned to Top Right (Desktop) or as row in mobile */}
         <div className="absolute top-6 right-6 hidden md:flex items-center gap-2">
           <Link
             href="/browse"
             className="flex items-center gap-2 px-3 py-1.5 text-[9px] font-bold tracking-widest uppercase transition-colors rounded-lg"
-            style={{
-              background: 'var(--primary)',
-              color: '#0d0f0e',
-            }}
+            style={{ background: 'var(--primary)', color: '#0d0f0e' }}
           >
             BROWSE LIBRARY →
           </Link>
@@ -106,15 +98,11 @@ export default function Home() {
           </Link>
         </div>
 
-        {/* Mobile Action Buttons (Visible only on small screens) */}
         <div className="md:hidden flex flex-wrap justify-center gap-2 mb-6">
           <Link
             href="/browse"
             className="flex items-center gap-2 px-4 py-2 text-[10px] font-bold tracking-widest uppercase transition-colors rounded-lg"
-            style={{
-              background: 'var(--primary)',
-              color: '#0d0f0e',
-            }}
+            style={{ background: 'var(--primary)', color: '#0d0f0e' }}
           >
             BROWSE LIBRARY →
           </Link>
@@ -131,7 +119,6 @@ export default function Home() {
           </Link>
         </div>
 
-        {/* Search Bar */}
         <div className="w-full max-w-2xl mx-auto mb-6">
           <div
             className="flex items-center gap-3 px-4 py-2.5 rounded-xl border transition-all"
@@ -153,7 +140,6 @@ export default function Home() {
           </div>
         </div>
 
-        {/* Filters Row */}
         <div className="flex flex-wrap justify-center items-center gap-3">
           <div className="relative group">
             <select
@@ -168,15 +154,8 @@ export default function Home() {
             >
               <option value="">All Categories</option>
               {[
-                "Engineering",
-                "QA / Testing",
-                "Product",
-                "Design / UX",
-                "Marketing",
-                "Sales",
-                "Customer Support",
-                "HR / Internal Ops",
-                "Leadership / Strategy"
+                "Engineering", "QA / Testing", "Product", "Design / UX",
+                "Marketing", "Sales", "Customer Support", "HR / Internal Ops", "Leadership / Strategy"
               ].map(cat => (
                 <option key={cat} value={cat}>{cat}</option>
               ))}
@@ -208,11 +187,10 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Results Count Info */}
-      {(selectedCategory || searchQuery) && (
+      {isFiltering && (
         <div className="px-6 flex items-center justify-between border-b border-border pb-4">
           <div className="text-xs font-bold tracking-widest text-muted-foreground uppercase">
-            Showing {filteredPrompts.length} results for:
+            Showing {prompts.length} results for:
             {selectedCategory && <span className="text-primary ml-2">{selectedCategory}</span>}
             {searchQuery && <span className="text-primary ml-2">"{searchQuery}"</span>}
           </div>
@@ -225,8 +203,8 @@ export default function Home() {
         </div>
       )}
 
-      {/* FEATURED: Only show if NOT filtering or if items match */}
-      {featuredPrompts.length > 0 && (
+      {/* FEATURED SELECTION */}
+      {!isFiltering && featuredPrompts.length > 0 && (
         <section
           className="p-8 rounded-2xl border mb-10"
           style={{
@@ -250,11 +228,7 @@ export default function Home() {
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {loading ? (
-              <>
-                <PromptCardSkeleton />
-                <PromptCardSkeleton />
-                <PromptCardSkeleton />
-              </>
+              Array.from({ length: 3 }).map((_, i) => <PromptCardSkeleton key={i} />)
             ) : (
               featuredPrompts.map(prompt => (
                 <PromptCard key={prompt.id} prompt={prompt} />
@@ -264,8 +238,8 @@ export default function Home() {
         </section>
       )}
 
-      {/* TRENDING: Only show if NOT filtering or if items match */}
-      {mostUsedPrompts.length > 0 && !selectedCategory && !searchQuery && (
+      {/* TRENDING INTERNAL */}
+      {!isFiltering && mostUsedPrompts.length > 0 && (
         <section
           className="p-8 rounded-2xl border mb-10"
           style={{
@@ -282,12 +256,7 @@ export default function Home() {
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {loading ? (
-              <>
-                <PromptCardSkeleton />
-                <PromptCardSkeleton />
-                <PromptCardSkeleton />
-                <PromptCardSkeleton />
-              </>
+              Array.from({ length: 4 }).map((_, i) => <PromptCardSkeleton key={i} />)
             ) : (
               mostUsedPrompts.map(prompt => (
                 <PromptCard key={prompt.id} prompt={prompt} />
@@ -297,72 +266,34 @@ export default function Home() {
         </section>
       )}
 
-      {/* RECENTLY ADDED: Only show if filtering OR if not already saturated */}
-      {recentPrompts.length > 0 && (selectedCategory || searchQuery) && (
-        <section
-          className="p-8 rounded-2xl border mb-10"
-          style={{
-            borderColor: 'var(--border)',
-            background: 'color-mix(in srgb, var(--surface), transparent 40%)',
-            backdropFilter: 'blur(12px)'
-          }}
-        >
-          <div className="term-section-header mb-4 px-2">
-            <span className="term-label flex items-center gap-1.5 font-bold">
-              <Clock className="h-3 w-3" style={{ color: 'var(--primary)' }} />
-              SEARCH RESULTS
-            </span>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {loading ? (
-              <>
-                <PromptCardSkeleton />
-                <PromptCardSkeleton />
-                <PromptCardSkeleton />
-              </>
-            ) : (
-              recentPrompts.map(prompt => (
-                <PromptCard key={prompt.id} prompt={prompt} />
-              ))
-            )}
-          </div>
-        </section>
-      )}
-
-      {/* Default RECENTLY ADDED (when not filtering) */}
-      {recentPrompts.length > 0 && !selectedCategory && !searchQuery && (
-        <section
-          className="p-8 rounded-2xl border"
-          style={{
-            borderColor: 'var(--border)',
-            background: 'color-mix(in srgb, var(--surface), transparent 40%)',
-            backdropFilter: 'blur(12px)'
-          }}
-        >
-          <div className="term-section-header mb-4 px-2">
-            <span className="term-label flex items-center gap-1.5 font-bold">
-              <Clock className="h-3 w-3" style={{ color: 'var(--primary)' }} />
-              RECENTLY ADDED
-            </span>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {loading ? (
-              <>
-                <PromptCardSkeleton />
-                <PromptCardSkeleton />
-                <PromptCardSkeleton />
-              </>
-            ) : (
-              recentPrompts.map(prompt => (
-                <PromptCard key={prompt.id} prompt={prompt} />
-              ))
-            )}
-          </div>
-        </section>
-      )}
+      {/* MAIN FEED */}
+      <section
+        className="p-8 rounded-2xl border"
+        style={{
+          borderColor: 'var(--border)',
+          background: 'color-mix(in srgb, var(--surface), transparent 40%)',
+          backdropFilter: 'blur(12px)'
+        }}
+      >
+        <div className="term-section-header mb-4 px-2">
+          <span className="term-label flex items-center gap-1.5 font-bold">
+            <Clock className="h-3 w-3" style={{ color: 'var(--primary)' }} />
+            {isFiltering ? "SEARCH RESULTS" : "RECENTLY ADDED"}
+          </span>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {loading ? (
+            Array.from({ length: 6 }).map((_, i) => <PromptCardSkeleton key={i} />)
+          ) : (
+            recentPrompts.map(prompt => (
+              <PromptCard key={prompt.id} prompt={prompt} />
+            ))
+          )}
+        </div>
+      </section>
 
       {/* No Results Fallback */}
-      {filteredPrompts.length === 0 && (
+      {!loading && prompts.length === 0 && (
         <div className="py-20 text-center border border-dashed border-border rounded-xl">
           <div className="term-label mb-2 font-bold tracking-[0.2em]">NO PROMPTS FOUND</div>
           <p className="text-sm text-foreground-muted">Try adjusting your filters or search terms.</p>
@@ -375,7 +306,6 @@ export default function Home() {
         </div>
       )}
 
-      {/* Footer */}
       <div className="pt-8 mt-8" style={{ borderTop: '1px solid var(--border)' }}>
         <p className="text-[10px] tracking-widest opacity-50" style={{ color: 'var(--foreground-muted)' }}>
           SYSTEM_LOG: DATA_SOURCE_SUPABASE // {mounted ? new Date().toISOString() : "2026-02-24T00:00:00.000Z"} // CLASSIFIED INTERNAL USE ONLY

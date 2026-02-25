@@ -15,7 +15,12 @@ import type { Database } from "@/lib/supabase/types";
 const PUBLIC_COLUMNS =
     "id, title, category, role, use_case, prompt_text, model_compatibility, difficulty, status, version, created_at, updated_at";
 
-export async function GET() {
+export async function GET(request: Request) {
+    const { searchParams } = new URL(request.url);
+    const category = searchParams.get("category");
+    const difficulty = searchParams.get("difficulty");
+    const search = searchParams.get("search");
+
     const cookieStore = await cookies();
     const supabase = createServerClient<Database>(
         process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -30,14 +35,27 @@ export async function GET() {
         }
     );
 
-    const { data, error } = await supabase
+    let query = supabase
         .from("prompts")
         .select(`
             ${PUBLIC_COLUMNS},
             profiles:owner_id (display_name)
         `)
         .eq("status", "approved")
-        .is("deleted_at", null)
+        .is("deleted_at", null);
+
+    // Apply filtering
+    if (category && category !== "All") {
+        query = query.contains("category", [category]);
+    }
+    if (difficulty && difficulty !== "All") {
+        query = query.eq("difficulty", difficulty);
+    }
+    if (search) {
+        query = query.or(`title.ilike.%${search}%,use_case.ilike.%${search}%,prompt_text.ilike.%${search}%`);
+    }
+
+    const { data, error } = await query
         .order("created_at", { ascending: false });
 
     if (error) {
@@ -45,7 +63,9 @@ export async function GET() {
         return NextResponse.json({ error: "Failed to fetch prompts" }, { status: 500 });
     }
 
-    return NextResponse.json({ prompts: data }, { status: 200 });
+    return NextResponse.json({
+        prompts: data ?? []
+    }, { status: 200 });
 }
 
 // Input validation schema — mirrors DB constraints

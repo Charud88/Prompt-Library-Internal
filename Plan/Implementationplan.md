@@ -16,10 +16,10 @@ This document outlines the detailed roadmap for optimizing and deploying the Dig
 *Targeting a "Premium" aesthetic and seamless interaction.*
 
 ### 🛠️ Key Actions:
-- [ ] **Animations**: Implement smooth page transitions (framer-motion) and micro-interactions for buttons/cards.
-- [ ] **Skeleton States**: Add consistent loading skeletons to replace jarring "loading..." text.
-- [ ] **Responsive Audit**: Fix layout issues on mobile viewports, especially the Admin and Library pages.
-- [ ] **Accessibility (a11y)**: Ensure proper ARIA labels and keyboard navigation for all interactive elements.
+- [x] **Animations**: Implement smooth page transitions (framer-motion) and micro-interactions for buttons/cards.
+- [x] **Skeleton States**: Add consistent loading skeletons to replace jarring "loading..." text.
+- [x] **Responsive Audit**: Fix layout issues on mobile viewports, especially the Admin and Library pages.
+- [x] **Accessibility (a11y)**: Ensure proper ARIA labels and keyboard navigation for all interactive elements.
 
 ---
 
@@ -29,8 +29,12 @@ This document outlines the detailed roadmap for optimizing and deploying the Dig
 ### 🛠️ Key Actions:
 - [ ] **Server-Side Pagination**: Move from "load all" to paginated fetching for the main Prompt list.
 - [ ] **Query Optimization**: Update Supabase calls to fetch only required fields (Select filtering) and add necessary DB indexes.
-- [ ] **Caching Layer**: Implement SWR or React Query to cache data on the client and prevent redundant network calls.
-- [ ] **Asset Optimization**: Optimize image sizing and weight for faster initial page loads.
+- [x] **Caching Layer**: Implement SWR or React Query to cache data on the client and prevent redundant network calls.
+- [x] **Asset Optimization**: Optimize image sizing and weight for faster initial page loads.
+- [x] **Admin & Audit Optimization**:
+    - Refactor `/api/admin/prompts` and `/api/admin/audit` to support server-side pagination.
+    - Migrate Admin and Audit pages to TanStack Query for caching and efficient data management.
+    - Add database indexes for `audit_log` table.
 
 ---
 

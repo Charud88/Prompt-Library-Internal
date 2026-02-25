@@ -1,34 +1,60 @@
 "use client";
 
 import { useMemo, useState, useEffect } from "react";
-import { type Prompt } from "@/lib/mock-data";
-import { fetchApprovedPrompts } from "@/lib/data/prompts";
-import { PromptCard } from "@/components/shared/PromptCard";
+import { PromptCard, PromptCardSkeleton } from "@/components/shared/PromptCard";
 import { useBookmarks } from "@/lib/BookmarkContext";
-import { Bookmark, ArrowRight, Loader2 } from "lucide-react";
+import { Bookmark, ArrowRight, AlertCircle } from "lucide-react";
 import Link from "next/link";
 
 export default function LibraryPage() {
     const { bookmarks } = useBookmarks();
-    const [allPrompts, setAllPrompts] = useState<Prompt[]>([]);
+    const [prompts, setPrompts] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(false);
+
+    const fetchPrompts = async () => {
+        setLoading(true);
+        setError(false);
+        try {
+            const res = await fetch("/api/prompts");
+            if (!res.ok) throw new Error("Failed to fetch");
+            const data = await res.json();
+            setPrompts(data.prompts || []);
+        } catch (err) {
+            console.error("Library load error:", err);
+            setError(true);
+        } finally {
+            setLoading(false);
+        }
+    };
 
     useEffect(() => {
-        fetchApprovedPrompts()
-            .then(setAllPrompts)
-            .finally(() => setLoading(false));
+        fetchPrompts();
     }, []);
 
     const bookmarkedPrompts = useMemo(() =>
-        allPrompts.filter(p => bookmarks.includes(p.id)),
-        [allPrompts, bookmarks]
+        prompts.filter(p => bookmarks.includes(p.id)),
+        [prompts, bookmarks]
     );
 
     if (loading) {
         return (
-            <div className="flex flex-col items-center justify-center py-40 gap-4">
-                <Loader2 className="h-8 w-8 animate-spin" style={{ color: "var(--primary)" }} />
-                <div className="text-[10px] font-bold tracking-widest uppercase opacity-50">Loading Collection...</div>
+            <div className="space-y-6 animate-slide-up">
+                <div className="term-label">Syncing Collection...</div>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {Array.from({ length: 3 }).map((_, i) => <PromptCardSkeleton key={i} />)}
+                </div>
+            </div>
+        );
+    }
+
+    if (error) {
+        return (
+            <div className="py-20 text-center">
+                <AlertCircle className="h-10 w-10 mx-auto mb-4 text-red-500" />
+                <div className="term-label mb-2 text-red-500">SYSTEM_ERROR: SYNC_FAILED</div>
+                <p className="text-sm text-foreground-muted">Failed to load your collection. Please try again.</p>
+                <button onClick={() => window.location.reload()} className="mt-4 text-xs font-bold underline">RETRY</button>
             </div>
         );
     }

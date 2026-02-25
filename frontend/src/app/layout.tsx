@@ -26,6 +26,7 @@ export const metadata: Metadata = {
 
 import { PageTransition } from "@/components/shared/PageTransition";
 import { InfiniteGrid } from "@/components/ui/the-infinite-grid";
+import { QueryProvider } from "@/components/providers/QueryProvider";
 
 export default function RootLayout({
   children,
@@ -39,26 +40,28 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
         style={{ background: 'var(--background)', color: 'var(--foreground)' }}
       >
-        <ThemeProvider>
-          <BrowseProvider>
-            <BookmarkProvider>
-              <div className="relative isolate flex flex-col min-h-screen">
-                <InfiniteGrid className="fixed inset-0 -z-10 opacity-[0.4]" />
+        <QueryProvider>
+          <ThemeProvider>
+            <BrowseProvider>
+              <BookmarkProvider>
+                <div className="relative isolate flex flex-col min-h-screen">
+                  <InfiniteGrid className="fixed inset-0 -z-10 opacity-[0.4]" />
 
-                <header className="fixed top-0 left-0 w-full z-[60]" style={{ background: 'var(--surface)' }}>
-                  <WarningBanner />
-                  <Navbar />
-                </header>
-                <div className="flex flex-1 pt-20 relative">
-                  <Sidebar />
-                  <main className="flex-1 w-full p-4 md:p-6 lg:p-8 overflow-x-hidden">
-                    <PageTransition>{children}</PageTransition>
-                  </main>
+                  <header className="fixed top-0 left-0 w-full z-[60]" style={{ background: 'var(--surface)' }}>
+                    <WarningBanner />
+                    <Navbar />
+                  </header>
+                  <div className="flex flex-1 pt-20 relative">
+                    <Sidebar />
+                    <main className="flex-1 w-full p-4 md:p-6 lg:p-8 overflow-x-hidden">
+                      <PageTransition>{children}</PageTransition>
+                    </main>
+                  </div>
                 </div>
-              </div>
-            </BookmarkProvider>
-          </BrowseProvider>
-        </ThemeProvider>
+              </BookmarkProvider>
+            </BrowseProvider>
+          </ThemeProvider>
+        </QueryProvider>
       </body>
     </html>
   );

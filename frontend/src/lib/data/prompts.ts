@@ -46,28 +46,52 @@ function adaptPrompt(p: Record<string, any>): Prompt {
 }
 
 /**
- * Fetch all approved, non-deleted prompts.
- * Used by Home and Browse pages.
- * Returns [] on error — never throws.
+ * Fetch approved, non-deleted prompts with pagination and filtering.
+ * Used by Home and Browse pages through react-query.
  */
-export async function fetchApprovedPrompts(): Promise<Prompt[]> {
+export async function fetchApprovedPrompts(params: {
+    page?: number;
+    limit?: number;
+    category?: string;
+    difficulty?: string;
+    search?: string;
+} = {}): Promise<{
+    prompts: Prompt[];
+    totalCount: number;
+    hasNextPage: boolean;
+    page: number;
+}> {
     try {
-        const res = await fetch('/api/prompts');
+        const queryParams = new URLSearchParams();
+        if (params.page !== undefined) queryParams.set("page", params.page.toString());
+        if (params.limit !== undefined) queryParams.set("limit", params.limit.toString());
+        if (params.category) queryParams.set("category", params.category);
+        if (params.difficulty) queryParams.set("difficulty", params.difficulty);
+        if (params.search) queryParams.set("search", params.search);
+
+        const res = await fetch(`/api/prompts?${queryParams.toString()}`);
         if (!res.ok) {
             console.error("[fetchApprovedPrompts] Status:", res.status);
-            return [];
+            return { prompts: [], totalCount: 0, hasNextPage: false, page: params.page || 0 };
         }
         const data = await res.json();
-        return (data.prompts || []).map((p: any) => {
+        const prompts = (data.prompts || []).map((p: any) => {
             const adapted = adaptPrompt(p);
             if (p.profiles && !Array.isArray(p.profiles)) {
                 adapted.owner = (p.profiles as any).display_name || "Unknown";
             }
             return adapted;
         });
+
+        return {
+            prompts,
+            totalCount: data.totalCount || 0,
+            hasNextPage: !!data.hasNextPage,
+            page: data.page ?? (params.page || 0)
+        };
     } catch (error: any) {
         console.error("[fetchApprovedPrompts]", error.message || error);
-        return [];
+        return { prompts: [], totalCount: 0, hasNextPage: false, page: params.page || 0 };
     }
 }
 

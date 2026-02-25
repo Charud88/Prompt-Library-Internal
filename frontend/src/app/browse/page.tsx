@@ -1,10 +1,9 @@
 "use client";
 
 import { useMemo, useState, useEffect } from "react";
-import { type Prompt, Category, Difficulty } from "@/lib/mock-data";
-import { fetchApprovedPrompts } from "@/lib/data/prompts";
-import { PromptCard } from "@/components/shared/PromptCard";
-import { Search, Filter, X, SlidersHorizontal } from "lucide-react";
+import { type Category, type Difficulty } from "@/lib/mock-data";
+import { PromptCard, PromptCardSkeleton } from "@/components/shared/PromptCard";
+import { Search, X, SlidersHorizontal, AlertCircle } from "lucide-react";
 import { useBrowse } from "@/lib/BrowseContext";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -23,39 +22,53 @@ export default function BrowsePage() {
     } = useBrowse();
 
     const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
-    const [prompts, setPrompts] = useState<Prompt[]>([]);
+    const [prompts, setPrompts] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(false);
+
+    const fetchPrompts = async () => {
+        setLoading(true);
+        setError(false);
+        try {
+            const params = new URLSearchParams();
+            if (selectedCategory !== "All") params.append("category", selectedCategory);
+            if (selectedDifficulty !== "All") params.append("difficulty", selectedDifficulty);
+            if (searchQuery) params.append("search", searchQuery);
+
+            const res = await fetch(`/api/prompts?${params.toString()}`);
+            if (!res.ok) throw new Error("Failed to fetch");
+            const data = await res.json();
+            setPrompts(data.prompts || []);
+        } catch (err) {
+            console.error("Browse fetch error:", err);
+            setError(true);
+        } finally {
+            setLoading(false);
+        }
+    };
 
     useEffect(() => {
-        fetchApprovedPrompts()
-            .then(setPrompts)
-            .finally(() => setLoading(false));
-    }, []);
+        fetchPrompts();
+    }, [selectedCategory, selectedDifficulty, searchQuery]);
 
-    const filteredPrompts = useMemo(() => {
-        return prompts.filter((prompt: Prompt) => {
-            const matchesSearch =
-                prompt.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                prompt.use_case.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                prompt.prompt_text.toLowerCase().includes(searchQuery.toLowerCase());
-
-            const matchesCategory = selectedCategory === "All" || prompt.category.includes(selectedCategory as Category);
-            const matchesDifficulty = selectedDifficulty === "All" || prompt.difficulty === selectedDifficulty;
-
-            return matchesSearch && matchesCategory && matchesDifficulty;
-        });
-    }, [prompts, searchQuery, selectedCategory, selectedDifficulty]);
-
-    // Show loading skeleton while fetching
     if (loading) {
         return (
             <div className="space-y-6 animate-slide-up">
                 <div className="term-label">LOADING PROMPTS...</div>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {Array.from({ length: 6 }).map((_, i) => (
-                        <div key={i} className="h-48 rounded-xl animate-pulse" style={{ background: 'var(--surface-2)' }} />
-                    ))}
+                    {Array.from({ length: 9 }).map((_, i) => <PromptCardSkeleton key={i} />)}
                 </div>
+            </div>
+        );
+    }
+
+    if (error) {
+        return (
+            <div className="py-20 text-center">
+                <AlertCircle className="h-10 w-10 mx-auto mb-4 text-red-500" />
+                <div className="term-label mb-2 text-red-500">SYSTEM_ERROR: FETCH_FAILED</div>
+                <p className="text-sm text-foreground-muted">Failed to load prompts. Please try again.</p>
+                <button onClick={() => window.location.reload()} className="mt-4 text-xs font-bold underline">RETRY_CONNECTION</button>
             </div>
         );
     }
@@ -78,7 +91,7 @@ export default function BrowsePage() {
                             BROWSE
                         </h1>
                         <p className="text-xs mt-1" style={{ color: 'var(--foreground-muted)' }}>
-                            {filteredPrompts.length} RESULT{filteredPrompts.length !== 1 ? 'S' : ''} FOUND
+                            {prompts.length} RESULT{prompts.length !== 1 ? 'S' : ''} FOUND IN DATABASE
                         </p>
                     </div>
 
@@ -139,8 +152,8 @@ export default function BrowsePage() {
                                 initial={{ x: "100%" }}
                                 animate={{ x: 0 }}
                                 exit={{ x: "100%" }}
-                                className="w-[80%] max-w-sm h-full overflow-y-auto p-6 space-y-6"
                                 style={{ background: 'var(--surface)', borderLeft: '1px solid var(--border)' }}
+                                className="w-[80%] max-w-sm h-full overflow-y-auto p-6 space-y-6"
                             >
                                 <div className="flex justify-between items-center">
                                     <span className="term-label">FILTERS</span>
@@ -214,22 +227,24 @@ export default function BrowsePage() {
                 </AnimatePresence>
 
                 {/* Grid */}
-                <div className="grid grid-cols-1 md:grid-cols-2 2xl:grid-cols-3 gap-6">
-                    {filteredPrompts.length > 0 ? (
-                        filteredPrompts.map(prompt => (
-                            <PromptCard key={prompt.id} prompt={prompt} />
-                        ))
-                    ) : (
-                        <div className="col-span-full py-20 text-center border border-dashed border-border rounded-xl">
-                            <Search className="h-8 w-8 mx-auto mb-4" style={{ color: 'var(--foreground-muted)' }} />
-                            <h3 className="text-sm font-bold mb-1 uppercase tracking-widest" style={{ color: 'var(--foreground)' }}>
-                                NO RESULTS FOUND
-                            </h3>
-                            <p className="text-xs tracking-wide" style={{ color: 'var(--foreground-muted)' }}>
-                                Adjust your search or filters and try again.
-                            </p>
-                        </div>
-                    )}
+                <div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 2xl:grid-cols-3 gap-6">
+                        {prompts.length > 0 ? (
+                            prompts.map(prompt => (
+                                <PromptCard key={prompt.id} prompt={prompt} />
+                            ))
+                        ) : (
+                            <div className="col-span-full py-20 text-center border border-dashed border-border rounded-xl">
+                                <Search className="h-8 w-8 mx-auto mb-4" style={{ color: 'var(--foreground-muted)' }} />
+                                <h3 className="text-sm font-bold mb-1 uppercase tracking-widest" style={{ color: 'var(--foreground)' }}>
+                                    NO RESULTS FOUND
+                                </h3>
+                                <p className="text-xs tracking-wide" style={{ color: 'var(--foreground-muted)' }}>
+                                    Adjust your search or filters and try again.
+                                </p>
+                            </div>
+                        )}
+                    </div>
                 </div>
             </div>
         </section>
