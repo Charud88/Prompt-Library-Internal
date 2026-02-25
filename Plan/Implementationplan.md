@@ -27,14 +27,10 @@ This document outlines the detailed roadmap for optimizing and deploying the Dig
 *Building a foundation for thousands of prompts.*
 
 ### 🛠️ Key Actions:
-- [ ] **Server-Side Pagination**: Move from "load all" to paginated fetching for the main Prompt list.
-- [ ] **Query Optimization**: Update Supabase calls to fetch only required fields (Select filtering) and add necessary DB indexes.
+- [x] **Server-Side Pagination**: Move from "load all" to paginated fetching for the main Prompt list.
+- [x] **Query Optimization**: Update Supabase calls to fetch only required fields (Select filtering) and add necessary DB indexes.
 - [x] **Caching Layer**: Implement SWR or React Query to cache data on the client and prevent redundant network calls.
 - [x] **Asset Optimization**: Optimize image sizing and weight for faster initial page loads.
-- [x] **Admin & Audit Optimization**:
-    - Refactor `/api/admin/prompts` and `/api/admin/audit` to support server-side pagination.
-    - Migrate Admin and Audit pages to TanStack Query for caching and efficient data management.
-    - Add database indexes for `audit_log` table.
 
 ---
 

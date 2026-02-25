@@ -24,10 +24,20 @@ export default function BrowsePage() {
     const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
     const [prompts, setPrompts] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
+    const [loadingMore, setLoadingMore] = useState(false);
     const [error, setError] = useState(false);
 
-    const fetchPrompts = async () => {
-        setLoading(true);
+    // Pagination state
+    const [page, setPage] = useState(1);
+    const [hasNextPage, setHasNextPage] = useState(false);
+    const limit = 12;
+
+    const fetchPrompts = async (currentPage: number, isLoadMore = false) => {
+        if (isLoadMore) {
+            setLoadingMore(true);
+        } else {
+            setLoading(true);
+        }
         setError(false);
         try {
             const params = new URLSearchParams();
@@ -35,23 +45,42 @@ export default function BrowsePage() {
             if (selectedDifficulty !== "All") params.append("difficulty", selectedDifficulty);
             if (searchQuery) params.append("search", searchQuery);
 
+            params.append("page", currentPage.toString());
+            params.append("limit", limit.toString());
+
             const res = await fetch(`/api/prompts?${params.toString()}`);
             if (!res.ok) throw new Error("Failed to fetch");
             const data = await res.json();
-            setPrompts(data.prompts || []);
+
+            if (isLoadMore) {
+                setPrompts(prev => [...prev, ...(data.prompts || [])]);
+            } else {
+                setPrompts(data.prompts || []);
+            }
+
+            setHasNextPage(data.hasNextPage || false);
         } catch (err) {
             console.error("Browse fetch error:", err);
             setError(true);
         } finally {
             setLoading(false);
+            setLoadingMore(false);
         }
     };
 
+    // Reset pagination and fetch when filters change
     useEffect(() => {
-        fetchPrompts();
+        setPage(1);
+        fetchPrompts(1, false);
     }, [selectedCategory, selectedDifficulty, searchQuery]);
 
-    if (loading) {
+    const handleLoadMore = () => {
+        const nextPage = page + 1;
+        setPage(nextPage);
+        fetchPrompts(nextPage, true);
+    };
+
+    if (loading && page === 1) {
         return (
             <div className="space-y-6 animate-slide-up">
                 <div className="term-label">LOADING PROMPTS...</div>
@@ -62,7 +91,7 @@ export default function BrowsePage() {
         );
     }
 
-    if (error) {
+    if (error && page === 1) {
         return (
             <div className="py-20 text-center">
                 <AlertCircle className="h-10 w-10 mx-auto mb-4 text-red-500" />
@@ -227,25 +256,41 @@ export default function BrowsePage() {
                 </AnimatePresence>
 
                 {/* Grid */}
-                <div>
-                    <div className="grid grid-cols-1 md:grid-cols-2 2xl:grid-cols-3 gap-6">
-                        {prompts.length > 0 ? (
-                            prompts.map(prompt => (
-                                <PromptCard key={prompt.id} prompt={prompt} />
-                            ))
-                        ) : (
-                            <div className="col-span-full py-20 text-center border border-dashed border-border rounded-xl">
-                                <Search className="h-8 w-8 mx-auto mb-4" style={{ color: 'var(--foreground-muted)' }} />
-                                <h3 className="text-sm font-bold mb-1 uppercase tracking-widest" style={{ color: 'var(--foreground)' }}>
-                                    NO RESULTS FOUND
-                                </h3>
-                                <p className="text-xs tracking-wide" style={{ color: 'var(--foreground-muted)' }}>
-                                    Adjust your search or filters and try again.
-                                </p>
-                            </div>
-                        )}
-                    </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 2xl:grid-cols-3 gap-6">
+                    {prompts.length > 0 ? (
+                        prompts.map(prompt => (
+                            <PromptCard key={prompt.id} prompt={prompt} />
+                        ))
+                    ) : (
+                        <div className="col-span-full py-20 text-center border border-dashed border-border rounded-xl">
+                            <Search className="h-8 w-8 mx-auto mb-4" style={{ color: 'var(--foreground-muted)' }} />
+                            <h3 className="text-sm font-bold mb-1 uppercase tracking-widest" style={{ color: 'var(--foreground)' }}>
+                                NO RESULTS FOUND
+                            </h3>
+                            <p className="text-xs tracking-wide" style={{ color: 'var(--foreground-muted)' }}>
+                                Adjust your search or filters and try again.
+                            </p>
+                        </div>
+                    )}
                 </div>
+
+                {/* Load More Button */}
+                {hasNextPage && (
+                    <div className="mt-8 text-center pt-8 border-t border-border">
+                        <button
+                            onClick={handleLoadMore}
+                            disabled={loadingMore}
+                            className="px-6 py-2 text-xs font-bold tracking-widest uppercase transition-all rounded-lg disabled:opacity-50"
+                            style={{
+                                background: 'var(--surface-2)',
+                                border: '1px solid var(--border)',
+                                color: 'var(--foreground)',
+                            }}
+                        >
+                            {loadingMore ? "LOADING..." : "LOAD MORE RESULTS"}
+                        </button>
+                    </div>
+                )}
             </div>
         </section>
     );

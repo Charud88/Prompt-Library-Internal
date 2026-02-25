@@ -2,7 +2,7 @@
 
 import { Category } from "@/lib/mock-data";
 import { PromptCard, PromptCardSkeleton } from "@/components/shared/PromptCard";
-import { Sparkles, TrendingUp, Clock, ArrowRight, Search, ChevronDown, RefreshCw } from "lucide-react";
+import { Sparkles, TrendingUp, Clock, ArrowRight, Search, ChevronDown } from "lucide-react";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { useState, useMemo, useEffect } from "react";
@@ -20,6 +20,7 @@ export default function Home() {
       const params = new URLSearchParams();
       if (selectedCategory) params.append("category", selectedCategory);
       if (searchQuery) params.append("search", searchQuery);
+      params.append("limit", "15");
 
       const res = await fetch(`/api/prompts?${params.toString()}`);
       const data = await res.json();
@@ -164,19 +165,6 @@ export default function Home() {
               <ChevronDown className="h-3 w-3" style={{ color: 'var(--foreground-muted)' }} />
             </div>
           </div>
-
-          <button
-            onClick={handleRefresh}
-            className="flex items-center gap-2 px-6 py-2 rounded-xl text-[10px] font-bold tracking-widest uppercase transition-all"
-            style={{
-              background: 'var(--surface-2)',
-              border: '1px solid var(--border)',
-              color: 'var(--foreground)',
-            }}
-          >
-            <RefreshCw className="h-3 w-3" />
-            Refresh
-          </button>
         </div>
 
         <div

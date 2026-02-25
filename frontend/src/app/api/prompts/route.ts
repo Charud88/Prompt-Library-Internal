@@ -12,14 +12,20 @@ import { cookies } from "next/headers";
 import type { Database } from "@/lib/supabase/types";
 
 // Only select columns the UI needs — never expose owner_id or deleted_at to components
+// Excluded: role, use_case, model_compatibility, updated_at to reduce payload size for list view
 const PUBLIC_COLUMNS =
-    "id, title, category, role, use_case, prompt_text, model_compatibility, difficulty, status, version, created_at, updated_at";
+    "id, title, category, prompt_text, difficulty, status, version, created_at";
 
 export async function GET(request: Request) {
     const { searchParams } = new URL(request.url);
     const category = searchParams.get("category");
     const difficulty = searchParams.get("difficulty");
     const search = searchParams.get("search");
+    const page = parseInt(searchParams.get("page") || "1", 10);
+    const limit = parseInt(searchParams.get("limit") || "12", 10);
+
+    const from = (page - 1) * limit;
+    const to = from + limit - 1;
 
     const cookieStore = await cookies();
     const supabase = createServerClient<Database>(
@@ -40,7 +46,7 @@ export async function GET(request: Request) {
         .select(`
             ${PUBLIC_COLUMNS},
             profiles:owner_id (display_name)
-        `)
+        `, { count: 'exact' })
         .eq("status", "approved")
         .is("deleted_at", null);
 
@@ -55,8 +61,9 @@ export async function GET(request: Request) {
         query = query.or(`title.ilike.%${search}%,use_case.ilike.%${search}%,prompt_text.ilike.%${search}%`);
     }
 
-    const { data, error } = await query
-        .order("created_at", { ascending: false });
+    const { data, count, error } = await query
+        .order("created_at", { ascending: false })
+        .range(from, to);
 
     if (error) {
         console.error("[GET /api/prompts]", error.message);
@@ -64,7 +71,11 @@ export async function GET(request: Request) {
     }
 
     return NextResponse.json({
-        prompts: data ?? []
+        prompts: data ?? [],
+        totalCount: count ?? 0,
+        page,
+        limit,
+        hasNextPage: count ? from + limit < count : false
     }, { status: 200 });
 }
 
