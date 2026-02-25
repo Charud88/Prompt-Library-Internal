@@ -9,6 +9,12 @@ export async function GET(request: Request) {
     // if "next" is in param, use it as the redirect address
     const next = searchParams.get("next") ?? "/";
 
+    // Security Fix: Prevent Open Redirect vulnerabilities
+    // Ensure the redirect is a relative path within our application.
+    // Must start with exactly one '/' and not two '//' (which browsers treat as protocol-relative external domains).
+    const isRelativeUrl = next.startsWith("/") && !next.startsWith("//");
+    const safeNext = isRelativeUrl ? next : "/";
+
     if (code) {
         const cookieStore = await cookies();
         const supabase = createServerClient(
@@ -35,7 +41,7 @@ export async function GET(request: Request) {
         );
         const { error } = await supabase.auth.exchangeCodeForSession(code);
         if (!error) {
-            return NextResponse.redirect(`${origin}${next}`);
+            return NextResponse.redirect(`${origin}${safeNext}`);
         }
     }
 
