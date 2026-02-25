@@ -293,7 +293,7 @@ export default function Home() {
 
       <div className="pt-8 mt-8" style={{ borderTop: '1px solid var(--border)' }}>
         <p className="text-[10px] tracking-widest opacity-50" style={{ color: 'var(--foreground-muted)' }}>
-          SYSTEM_LOG: DATA_SOURCE_SUPABASE {"//"} {mounted ? new Date().toISOString() : "2026-02-24T00:00:00.000Z"} {"//"} CLASSIFIED INTERNAL USE ONLY
+          Digit88 Technologies Private Limited © 2026. All Rights Reserved.
         </p>
       </div>
     </div>
