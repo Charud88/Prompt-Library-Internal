@@ -65,7 +65,14 @@ export default function AuditLogPage() {
     };
 
     return (
-        <div className="max-w-4xl mx-auto pb-20">
+        <section
+            className="max-w-4xl mx-auto p-8 rounded-3xl border animate-slide-up"
+            style={{
+                borderColor: 'var(--border)',
+                background: 'color-mix(in srgb, var(--surface), transparent 50%)',
+                backdropFilter: 'blur(12px)'
+            }}
+        >
             <BackButton />
 
             <div className="mb-8 pb-4" style={{ borderBottom: '1px solid var(--border)' }}>
@@ -170,6 +177,6 @@ export default function AuditLogPage() {
                 </div>
             )
             }
-        </div >
+        </section>
     );
 }

@@ -2,11 +2,13 @@
 
 import { type Prompt, Category } from "@/lib/mock-data";
 import { fetchApprovedPrompts } from "@/lib/data/prompts";
-import { PromptCard } from "@/components/shared/PromptCard";
+import { PromptCard, PromptCardSkeleton } from "@/components/shared/PromptCard";
+import { Skeleton } from "@/components/shared/Skeleton";
 import { Sparkles, TrendingUp, Clock, ArrowRight, Search, ChevronDown, RefreshCw } from "lucide-react";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { useState, useMemo, useEffect } from "react";
+import { InfiniteGrid } from "@/components/ui/the-infinite-grid";
 
 export default function Home() {
   const [selectedCategory, setSelectedCategory] = useState<Category | "">("");
@@ -51,10 +53,13 @@ export default function Home() {
 
   return (
     <div className="space-y-10 animate-slide-up pb-16">
-
       <section
-        className="py-8 px-6 relative overflow-hidden"
-        style={{ border: '1px solid var(--border)', background: 'var(--surface)' }}
+        className="py-12 px-8 relative overflow-hidden rounded-2xl border"
+        style={{
+          borderColor: 'var(--border)',
+          background: 'color-mix(in srgb, var(--surface), transparent 50%)',
+          backdropFilter: 'blur(12px)'
+        }}
       >
         {/* Header Content: Centered Title and Subtitle */}
         <div className="flex flex-col items-center text-center mb-6">
@@ -195,10 +200,9 @@ export default function Home() {
           </button>
         </div>
 
-        {/* Background decoration */}
         <div
-          className="absolute right-4 bottom-0 text-[120px] font-black select-none pointer-events-none leading-none -mb-8"
-          style={{ color: 'var(--border)', opacity: 0.08 }}
+          className="absolute right-0 bottom-0 text-[120px] font-black select-none pointer-events-none leading-none -mb-2 -mr-1"
+          style={{ color: 'var(--border)', opacity: 0.15 }}
         >
           D88
         </div>
@@ -223,7 +227,14 @@ export default function Home() {
 
       {/* FEATURED: Only show if NOT filtering or if items match */}
       {featuredPrompts.length > 0 && (
-        <section>
+        <section
+          className="p-8 rounded-2xl border mb-10"
+          style={{
+            borderColor: 'var(--border)',
+            background: 'color-mix(in srgb, var(--surface), transparent 40%)',
+            backdropFilter: 'blur(12px)'
+          }}
+        >
           <div className="term-section-header mb-4 px-2">
             <span className="term-label flex items-center gap-1.5 font-bold">
               <Sparkles className="h-3 w-3" style={{ color: 'var(--accent-yellow)' }} />
@@ -238,16 +249,31 @@ export default function Home() {
             </Link>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {featuredPrompts.map(prompt => (
-              <PromptCard key={prompt.id} prompt={prompt} />
-            ))}
+            {loading ? (
+              <>
+                <PromptCardSkeleton />
+                <PromptCardSkeleton />
+                <PromptCardSkeleton />
+              </>
+            ) : (
+              featuredPrompts.map(prompt => (
+                <PromptCard key={prompt.id} prompt={prompt} />
+              ))
+            )}
           </div>
         </section>
       )}
 
       {/* TRENDING: Only show if NOT filtering or if items match */}
       {mostUsedPrompts.length > 0 && !selectedCategory && !searchQuery && (
-        <section>
+        <section
+          className="p-8 rounded-2xl border mb-10"
+          style={{
+            borderColor: 'var(--border)',
+            background: 'color-mix(in srgb, var(--surface), transparent 40%)',
+            backdropFilter: 'blur(12px)'
+          }}
+        >
           <div className="term-section-header mb-4 px-2">
             <span className="term-label flex items-center gap-1.5 font-bold">
               <TrendingUp className="h-3 w-3" style={{ color: 'var(--accent-blue)' }} />
@@ -255,16 +281,32 @@ export default function Home() {
             </span>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {mostUsedPrompts.map(prompt => (
-              <PromptCard key={prompt.id} prompt={prompt} />
-            ))}
+            {loading ? (
+              <>
+                <PromptCardSkeleton />
+                <PromptCardSkeleton />
+                <PromptCardSkeleton />
+                <PromptCardSkeleton />
+              </>
+            ) : (
+              mostUsedPrompts.map(prompt => (
+                <PromptCard key={prompt.id} prompt={prompt} />
+              ))
+            )}
           </div>
         </section>
       )}
 
       {/* RECENTLY ADDED: Only show if filtering OR if not already saturated */}
       {recentPrompts.length > 0 && (selectedCategory || searchQuery) && (
-        <section>
+        <section
+          className="p-8 rounded-2xl border mb-10"
+          style={{
+            borderColor: 'var(--border)',
+            background: 'color-mix(in srgb, var(--surface), transparent 40%)',
+            backdropFilter: 'blur(12px)'
+          }}
+        >
           <div className="term-section-header mb-4 px-2">
             <span className="term-label flex items-center gap-1.5 font-bold">
               <Clock className="h-3 w-3" style={{ color: 'var(--primary)' }} />
@@ -272,16 +314,31 @@ export default function Home() {
             </span>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {recentPrompts.map(prompt => (
-              <PromptCard key={prompt.id} prompt={prompt} />
-            ))}
+            {loading ? (
+              <>
+                <PromptCardSkeleton />
+                <PromptCardSkeleton />
+                <PromptCardSkeleton />
+              </>
+            ) : (
+              recentPrompts.map(prompt => (
+                <PromptCard key={prompt.id} prompt={prompt} />
+              ))
+            )}
           </div>
         </section>
       )}
 
       {/* Default RECENTLY ADDED (when not filtering) */}
       {recentPrompts.length > 0 && !selectedCategory && !searchQuery && (
-        <section>
+        <section
+          className="p-8 rounded-2xl border"
+          style={{
+            borderColor: 'var(--border)',
+            background: 'color-mix(in srgb, var(--surface), transparent 40%)',
+            backdropFilter: 'blur(12px)'
+          }}
+        >
           <div className="term-section-header mb-4 px-2">
             <span className="term-label flex items-center gap-1.5 font-bold">
               <Clock className="h-3 w-3" style={{ color: 'var(--primary)' }} />
@@ -289,9 +346,17 @@ export default function Home() {
             </span>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {recentPrompts.map(prompt => (
-              <PromptCard key={prompt.id} prompt={prompt} />
-            ))}
+            {loading ? (
+              <>
+                <PromptCardSkeleton />
+                <PromptCardSkeleton />
+                <PromptCardSkeleton />
+              </>
+            ) : (
+              recentPrompts.map(prompt => (
+                <PromptCard key={prompt.id} prompt={prompt} />
+              ))
+            )}
           </div>
         </section>
       )}

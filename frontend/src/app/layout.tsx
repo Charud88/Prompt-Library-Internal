@@ -24,6 +24,9 @@ export const metadata: Metadata = {
   description: BRAND_CONFIG.slogan,
 };
 
+import { PageTransition } from "@/components/shared/PageTransition";
+import { InfiniteGrid } from "@/components/ui/the-infinite-grid";
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -39,7 +42,9 @@ export default function RootLayout({
         <ThemeProvider>
           <BrowseProvider>
             <BookmarkProvider>
-              <div className="flex flex-col min-h-screen">
+              <div className="relative isolate flex flex-col min-h-screen">
+                <InfiniteGrid className="fixed inset-0 -z-10 opacity-[0.4]" />
+
                 <header className="fixed top-0 left-0 w-full z-[60]" style={{ background: 'var(--surface)' }}>
                   <WarningBanner />
                   <Navbar />
@@ -47,7 +52,7 @@ export default function RootLayout({
                 <div className="flex flex-1 pt-20 relative">
                   <Sidebar />
                   <main className="flex-1 w-full p-4 md:p-6 lg:p-8 overflow-x-hidden">
-                    {children}
+                    <PageTransition>{children}</PageTransition>
                   </main>
                 </div>
               </div>

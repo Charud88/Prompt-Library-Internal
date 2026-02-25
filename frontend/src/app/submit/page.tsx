@@ -147,7 +147,14 @@ export default function SubmitPromptPage() {
 
     if (!user) {
         return (
-            <div className="max-w-2xl mx-auto py-20 text-center">
+            <div
+                className="max-w-2xl mx-auto py-20 text-center rounded-2xl border"
+                style={{
+                    borderColor: 'var(--border)',
+                    background: 'color-mix(in srgb, var(--surface), transparent 50%)',
+                    backdropFilter: 'blur(12px)'
+                }}
+            >
                 <div className="w-16 h-16 mx-auto mb-6 flex items-center justify-center rounded-full" style={{ background: 'var(--surface-2)', border: '1px solid var(--border)' }}>
                     <LogIn className="h-6 w-6" style={{ color: 'var(--foreground-muted)' }} />
                 </div>
@@ -172,7 +179,14 @@ export default function SubmitPromptPage() {
 
     if (submitted) {
         return (
-            <div className="max-w-2xl mx-auto py-20 text-center">
+            <div
+                className="max-w-2xl mx-auto py-20 text-center rounded-2xl border"
+                style={{
+                    borderColor: 'var(--border)',
+                    background: 'color-mix(in srgb, var(--surface), transparent 50%)',
+                    backdropFilter: 'blur(12px)'
+                }}
+            >
                 <CheckCircle2 className="h-12 w-12 mx-auto mb-6" style={{ color: 'var(--primary)' }} />
                 <div className="term-label mb-2">STATUS: PENDING REVIEW</div>
                 <h2 className="text-2xl font-bold mb-3" style={{ color: 'var(--foreground)', letterSpacing: '-0.02em' }}>
@@ -213,7 +227,14 @@ export default function SubmitPromptPage() {
     }
 
     return (
-        <div className="max-w-3xl mx-auto pb-20">
+        <section
+            className="max-w-3xl mx-auto p-8 rounded-3xl border animate-slide-up"
+            style={{
+                borderColor: 'var(--border)',
+                background: 'color-mix(in srgb, var(--surface), transparent 50%)',
+                backdropFilter: 'blur(12px)'
+            }}
+        >
             <BackButton />
 
             <div className="mb-8 pb-4" style={{ borderBottom: '1px solid var(--border)' }}>
@@ -356,6 +377,6 @@ export default function SubmitPromptPage() {
                     </div>
                 </div>
             </form>
-        </div>
+        </section>
     );
 }
