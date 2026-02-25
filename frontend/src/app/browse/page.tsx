@@ -3,7 +3,7 @@
 import { useMemo, useState, useEffect } from "react";
 import { type Category, type Difficulty } from "@/lib/mock-data";
 import { PromptCard, PromptCardSkeleton } from "@/components/shared/PromptCard";
-import { Search, X, SlidersHorizontal, AlertCircle } from "lucide-react";
+import { Search, X, SlidersHorizontal, AlertCircle, Loader2 } from "lucide-react";
 import { useBrowse } from "@/lib/BrowseContext";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -82,11 +82,9 @@ export default function BrowsePage() {
 
     if (loading && page === 1) {
         return (
-            <div className="space-y-6 animate-slide-up">
-                <div className="term-label">LOADING PROMPTS...</div>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {Array.from({ length: 9 }).map((_, i) => <PromptCardSkeleton key={i} />)}
-                </div>
+            <div className="py-20 text-center animate-slide-up bg-card border border-border rounded-xl">
+                <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4" style={{ color: 'var(--primary)' }} />
+                <div className="term-label tracking-[0.2em]">LOADING PROMPTS...</div>
             </div>
         );
     }

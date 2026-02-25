@@ -3,7 +3,7 @@
 import { useMemo, useState, useEffect } from "react";
 import { PromptCard, PromptCardSkeleton } from "@/components/shared/PromptCard";
 import { useBookmarks } from "@/lib/BookmarkContext";
-import { Bookmark, ArrowRight, AlertCircle } from "lucide-react";
+import { Bookmark, ArrowRight, AlertCircle, Loader2 } from "lucide-react";
 import Link from "next/link";
 
 export default function LibraryPage() {
@@ -39,11 +39,9 @@ export default function LibraryPage() {
 
     if (loading) {
         return (
-            <div className="space-y-6 animate-slide-up">
-                <div className="term-label">Syncing Collection...</div>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {Array.from({ length: 3 }).map((_, i) => <PromptCardSkeleton key={i} />)}
-                </div>
+            <div className="py-20 text-center animate-slide-up bg-card border border-border rounded-xl">
+                <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4" style={{ color: 'var(--primary)' }} />
+                <div className="term-label tracking-[0.2em]">SYNCING COLLECTION...</div>
             </div>
         );
     }
