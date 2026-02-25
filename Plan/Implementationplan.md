@@ -42,9 +42,9 @@ This document outlines the detailed roadmap for optimizing and deploying the Dig
 - [ ] **Build Check**: Fix any environment-specific bugs that appear in the Vercel runtime.
 
 ### 🛠️ Step 2: Hardening & Security
-- [ ] **Supabase RLS Audit**: Verify Row Level Security policies ensure users can only edit/delete their own bookmarks (once auth is deep) and only admins can approve prompts.
-- [ ] **Global Error Boundaries**: Implement Next.js `error.tsx` catch-alls to prevent full-page crashes.
-- [ ] **Final Performance Check**: Run Lighthouse on the Vercel Preview URL and address high-priority delta fixes.
+- [x] **Supabase RLS Audit**: Verify Row Level Security policies ensure users can only edit/delete their own bookmarks (once auth is deep) and only admins can approve prompts.
+- [x] **Global Error Boundaries**: Implement Next.js `error.tsx` catch-alls to prevent full-page crashes.
+- [x] **Final Performance Check**: Run Lighthouse on the Vercel Preview URL and address high-priority delta fixes.
 
 ### 🛠️ Step 3: Formal Launch
 - [ ] **Database Population**: Wipe the existing `seed.sql` dummy prompts from Supabase and populate the database with the real, curated prompt collection.
