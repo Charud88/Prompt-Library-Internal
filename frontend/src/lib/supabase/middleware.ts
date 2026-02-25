@@ -41,6 +41,8 @@ export async function updateSession(request: NextRequest) {
     const url = request.nextUrl.clone();
 
     // If there is no user and they are trying to go to /submit or /admin or /library
+    // We let the client-side handle the "Access Denied" UI instead of an aggressive redirect.
+    /*
     if (
         !user &&
         (url.pathname.startsWith("/submit") ||
@@ -50,6 +52,7 @@ export async function updateSession(request: NextRequest) {
         url.pathname = "/"; // Send them home (or eventually to a login page)
         return NextResponse.redirect(url);
     }
+    */
 
     return supabaseResponse;
 }
