@@ -47,5 +47,6 @@ This document outlines the detailed roadmap for optimizing and deploying the Dig
 - [ ] **Final Performance Check**: Run Lighthouse on the Vercel Preview URL and address high-priority delta fixes.
 
 ### 🛠️ Step 3: Formal Launch
+- [ ] **Database Population**: Wipe the existing `seed.sql` dummy prompts from Supabase and populate the database with the real, curated prompt collection.
 - [ ] **Domain Mapping**: Configure custom domain (if applicable).
 - [ ] **Production Tagging**: Deploy the finalized `main` branch to the production stage.
