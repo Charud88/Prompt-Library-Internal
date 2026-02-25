@@ -111,7 +111,7 @@ export function PromptCard({ prompt, showStatus }: PromptCardProps) {
                         className="text-[11px] font-medium tracking-wide"
                         style={{ color: 'var(--foreground-muted)' }}
                     >
-                        {prompt.owner}
+                        {prompt.owner || (prompt as any).profiles?.display_name || "Digit88 Library"}
                     </span>
                 </div>
 

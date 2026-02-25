@@ -78,7 +78,7 @@ export async function fetchApprovedPrompts(params: {
         const prompts = (data.prompts || []).map((p: any) => {
             const adapted = adaptPrompt(p);
             if (p.profiles && !Array.isArray(p.profiles)) {
-                adapted.owner = (p.profiles as any).display_name || "Unknown";
+                adapted.owner = (p.profiles as any).display_name || "Digit88 Library";
             }
             return adapted;
         });
@@ -129,7 +129,7 @@ export async function fetchPromptById(id: string): Promise<Prompt | null> {
     const adapted = adaptPrompt(data);
     // Extract display name from join result
     if (data.profiles && !Array.isArray(data.profiles)) {
-        adapted.owner = (data.profiles as any).display_name || "Unknown";
+        adapted.owner = (data.profiles as any).display_name || "Digit88 Library";
     }
 
     return adapted;
