@@ -2,7 +2,7 @@
 
 A high-performance, secure, and beautifully crafted internal platform for managing and sharing AI prompts. Built with **Next.js 14**, **Supabase**, and **Tailwind CSS**.
 
-![Digit88 Prompt Library Banner](https://raw.githubusercontent.com/charud88/Prompt-Library-Internal/main/public/banner.png) *(Note: Replace with actual hosted banner URL)*
+![Digit88 Prompt Library Banner](https://raw.githubusercontent.com/Charud88/Prompt-Library-Internal/main/frontend/public/banner.png)
 
 ---
 
