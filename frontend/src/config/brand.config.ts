@@ -7,7 +7,7 @@ export const BRAND_CONFIG = {
   app_name: "Prompt Library",
   slogan: "High-quality AI prompts for high-performance teams.",
   logo: {
-    text: "digit88",
+    text: "DIGIT88",
     color: "#6366f1", // Default Indigo
   },
   colors: {

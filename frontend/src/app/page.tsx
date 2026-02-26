@@ -66,7 +66,7 @@ export default function Home() {
             className="text-2xl md:text-3xl font-bold tracking-tight leading-tight mb-3"
             style={{ color: 'var(--foreground)', letterSpacing: '-0.02em' }}
           >
-            <span style={{ color: 'var(--primary)' }}>D88</span> PROMPT LIBRARY
+            <span style={{ color: 'var(--primary)' }}>DIGIT88</span> PROMPT LIBRARY
           </motion.h1>
 
           <p
@@ -171,7 +171,7 @@ export default function Home() {
           className="absolute right-0 bottom-0 text-[120px] font-black select-none pointer-events-none leading-none -mb-2 -mr-1"
           style={{ color: 'var(--border)', opacity: 0.15 }}
         >
-          D88
+          DIGIT88
         </div>
       </section>
 
