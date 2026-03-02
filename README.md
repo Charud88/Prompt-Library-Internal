@@ -17,11 +17,7 @@ A high-performance, secure, and beautifully crafted internal platform for managi
 - **🎨 Premium UX**: Modern glassmorphism design with a dark-mode first terminal aesthetic.
 - **🏢 Leaver Strategy**: Intelligent data ownership logic ensuring corporate knowledge remains internal even if contributors leave.
 - **🛠️ Admin Command Center**: Comprehensive moderation tools and real-time audit logs.
-- **🎯 Private Prompt
-- Personal Stash: Create and save prompts that are completely private and visible only to you.
-- Bypass Admin Review: Private prompts skip the "pending review" queue and are immediately available for your personal use.
-- Secure by Design: Enforced Row Level Security (RLS) and backend API checks guarantee that no other user (not even admins) can view or access your private collection.
-- Dedicated Library Tab: Easily manage and delete your personal prompts in a dedicated "Private" tab within your Library, completely separate from bookmarked public prompts.
+- 🔒 Private Workspace: Create, save, and iterate on personal AI prompts with complete privacy. Private prompts are exclusively visible to the creator in a dedicated library tab, perfect for drafting or managing sensitive workflows without requiring admin approval.
 
 ---
 
