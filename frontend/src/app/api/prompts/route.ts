@@ -43,6 +43,7 @@ export async function GET(request: Request) {
         }
     );
 
+    // Build query
     let query = supabase
         .from("prompts")
         .select(`
@@ -50,6 +51,7 @@ export async function GET(request: Request) {
             profiles:owner_id (display_name)
         `, { count: 'exact' })
         .eq("status", "approved")
+        .eq("is_private", false)
         .is("deleted_at", null);
 
     // Apply filtering
@@ -107,6 +109,7 @@ const SubmitPromptSchema = z.object({
         .array(z.string())
         .default([]),
     difficulty: z.enum(["Beginner", "Intermediate", "Advanced"]),
+    is_private: z.boolean().optional().default(false),
 });
 
 export async function POST(request: Request) {
@@ -143,9 +146,10 @@ export async function POST(request: Request) {
     }
 
     // Security Contract: Domain restriction check
-    if (!user.email?.endsWith("@digit88.com")) {
+    // Ensure only @digit88.com users can submit prompts permanently.
+    if (!user.email?.toLowerCase().endsWith("@digit88.com")) {
         return NextResponse.json(
-            { error: "Only @digit88.com accounts can submit prompts." },
+            { error: "Access Denied. Only @digit88.com accounts are permitted to contribute." },
             { status: 403 }
         );
     }
@@ -165,6 +169,8 @@ export async function POST(request: Request) {
         );
     }
 
+    const isPrivate = parsed.data.is_private || false;
+
     // Cast the insertion object to any as a last resort for TS resolution issues
     // but keep it structured correctly for the DB.
     const insertData: any = {
@@ -175,8 +181,9 @@ export async function POST(request: Request) {
         prompt_text: parsed.data.prompt_text,
         model_compatibility: parsed.data.model_compatibility,
         difficulty: parsed.data.difficulty,
+        is_private: isPrivate,
         owner_id: user.id,
-        status: "pending",
+        status: isPrivate ? "approved" : "pending",
         version: "1.0.0",
     };
 

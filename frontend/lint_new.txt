@@ -1,0 +1,142 @@
+
+E:\ESCAPE 9-5\DIGIT88\Prompt Library\frontend\src\app\admin\page.tsx
+  50:23  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+E:\ESCAPE 9-5\DIGIT88\Prompt Library\frontend\src\app\api\admin\audit\route.ts
+  7:27  warning  'request' is defined but never used  @typescript-eslint/no-unused-vars
+
+E:\ESCAPE 9-5\DIGIT88\Prompt Library\frontend\src\app\api\admin\prompts\[id]\route.ts
+   89:29  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  107:14  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+E:\ESCAPE 9-5\DIGIT88\Prompt Library\frontend\src\app\api\admin\prompts\route.ts
+   7:27  warning  'request' is defined but never used       @typescript-eslint/no-unused-vars
+  52:29  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  73:29  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  94:30  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+E:\ESCAPE 9-5\DIGIT88\Prompt Library\frontend\src\app\api\prompts\route.ts
+  185:23  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  210:45  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+E:\ESCAPE 9-5\DIGIT88\Prompt Library\frontend\src\app\audit\page.tsx
+  18:15  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  40:23  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+E:\ESCAPE 9-5\DIGIT88\Prompt Library\frontend\src\app\browse\page.tsx
+    3:10  warning  'useMemo' is defined but never used                                                                              @typescript-eslint/no-unused-vars
+    5:22  warning  'PromptCardSkeleton' is defined but never used                                                                   @typescript-eslint/no-unused-vars
+   25:44  warning  Unexpected any. Specify a different type                                                                         @typescript-eslint/no-explicit-any
+   75:8   warning  React Hook useEffect has a missing dependency: 'fetchPrompts'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+  142:33  warning  `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`                                                  react/no-unescaped-entities
+  142:47  warning  `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`                                                  react/no-unescaped-entities
+
+E:\ESCAPE 9-5\DIGIT88\Prompt Library\frontend\src\app\page.tsx
+   4:22  warning  'PromptCardSkeleton' is defined but never used                                                                   @typescript-eslint/no-unused-vars
+  13:10  warning  'mounted' is assigned a value but never used                                                                     @typescript-eslint/no-unused-vars
+  14:42  warning  Unexpected any. Specify a different type                                                                         @typescript-eslint/no-explicit-any
+  38:6   warning  React Hook useEffect has a missing dependency: 'fetchPrompts'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+E:\ESCAPE 9-5\DIGIT88\Prompt Library\frontend\src\app\prompts\[id]\page.tsx
+    7:16  warning  'User' is defined but never used                                 @typescript-eslint/no-unused-vars
+  215:69  warning  `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`  react/no-unescaped-entities
+
+E:\ESCAPE 9-5\DIGIT88\Prompt Library\frontend\src\app\submissions\page.tsx
+   9:44  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  11:38  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+E:\ESCAPE 9-5\DIGIT88\Prompt Library\frontend\src\app\submit\page.tsx
+    5:10  warning  'Save' is defined but never used                                                                                                                       @typescript-eslint/no-unused-vars
+   38:38  warning  Unexpected any. Specify a different type                                                                                                               @typescript-eslint/no-explicit-any
+   47:35  warning  Unexpected any. Specify a different type                                                                                                               @typescript-eslint/no-explicit-any
+  121:42  warning  Unexpected any. Specify a different type                                                                                                               @typescript-eslint/no-explicit-any
+  222:21  error    Do not use an `<a>` element to navigate to `/`. Use `<Link />` from `next/link` instead. See: https://nextjs.org/docs/messages/no-html-link-for-pages  @next/next/no-html-link-for-pages
+
+E:\ESCAPE 9-5\DIGIT88\Prompt Library\frontend\src\components\layout\Navbar.tsx
+   8:10  warning  'Search' is defined but never used          @typescript-eslint/no-unused-vars
+   8:18  warning  'User' is defined but never used            @typescript-eslint/no-unused-vars
+  30:36  warning  'error' is assigned a value but never used  @typescript-eslint/no-unused-vars
+  34:35  warning  Unexpected any. Specify a different type    @typescript-eslint/no-explicit-any
+  44:27  warning  '_session' is defined but never used        @typescript-eslint/no-unused-vars
+
+E:\ESCAPE 9-5\DIGIT88\Prompt Library\frontend\src\components\layout\Sidebar.tsx
+  19:24  warning  Unexpected any. Specify a different type                                                                                      @typescript-eslint/no-explicit-any
+  21:25  error    React Hook "useBrowse" is called conditionally. React Hooks must be called in the exact same order in every component render  react-hooks/rules-of-hooks
+  22:14  warning  'e' is defined but never used                                                                                                 @typescript-eslint/no-unused-vars
+
+E:\ESCAPE 9-5\DIGIT88\Prompt Library\frontend\src\components\layout\ThemeToggle.tsx
+  11:23  error    Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+E:\ESCAPE 9-5\DIGIT88\Prompt Library\frontend\src\components\layout\ThemeToggle.tsx:11:23
+   9 |     const [mounted, setMounted] = useState(false);
+  10 |
+> 11 |     useEffect(() => { setMounted(true); }, []);
+     |                       ^^^^^^^^^^ Avoid calling setState() directly within an effect
+  12 |
+  13 |     if (!mounted) return <div className="h-6 w-24" style={{ background: 'var(--surface-2)', border: '1px solid var(--border)' }} />;
+  14 |  react-hooks/set-state-in-effect
+  31:55  warning  Unexpected any. Specify a different type                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   @typescript-eslint/no-explicit-any
+
+E:\ESCAPE 9-5\DIGIT88\Prompt Library\frontend\src\components\providers\QueryProvider.tsx
+  7:10  warning  'QueryClient' is defined but never used  @typescript-eslint/no-unused-vars
+
+E:\ESCAPE 9-5\DIGIT88\Prompt Library\frontend\src\components\shared\Skeleton.tsx
+  3:11  warning  An interface declaring no members is equivalent to its supertype  @typescript-eslint/no-empty-object-type
+
+E:\ESCAPE 9-5\DIGIT88\Prompt Library\frontend\src\components\shared\ThemeProvider.tsx
+  24:17  error  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+E:\ESCAPE 9-5\DIGIT88\Prompt Library\frontend\src\components\shared\ThemeProvider.tsx:24:17
+  22 |             const savedTheme = localStorage.getItem("theme");
+  23 |             if (savedTheme && ["light", "dark", "system"].includes(savedTheme)) {
+> 24 |                 setThemeState(savedTheme as Theme);
+     |                 ^^^^^^^^^^^^^ Avoid calling setState() directly within an effect
+  25 |             } else if (savedTheme) {
+  26 |                 localStorage.removeItem("theme");
+  27 |             }  react-hooks/set-state-in-effect
+
+E:\ESCAPE 9-5\DIGIT88\Prompt Library\frontend\src\components\ui\the-infinite-grid.tsx
+  75:55  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  75:69  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+E:\ESCAPE 9-5\DIGIT88\Prompt Library\frontend\src\lib\BookmarkContext.tsx
+    5:15  warning  'Database' is defined but never used      @typescript-eslint/no-unused-vars
+   19:38  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   57:75  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   57:97  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   70:54  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  123:68  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+E:\ESCAPE 9-5\DIGIT88\Prompt Library\frontend\src\lib\data\prompts.ts
+   78:54  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   81:48  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   92:21  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  120:27  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  132:43  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+E:\ESCAPE 9-5\DIGIT88\Prompt Library\frontend\src\lib\supabase\client.ts
+  50:28  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  61:41  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  72:74  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+E:\ESCAPE 9-5\DIGIT88\Prompt Library\frontend\src\lib\supabase\middleware.ts
+  18:58  warning  'options' is defined but never used       @typescript-eslint/no-unused-vars
+  48:11  warning  'url' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+E:\ESCAPE 9-5\DIGIT88\Prompt Library\frontend\test_security.js
+  1:14  warning  A `require()` style import is forbidden  @typescript-eslint/no-require-imports
+
+✖ 63 problems (4 errors, 59 warnings)
+

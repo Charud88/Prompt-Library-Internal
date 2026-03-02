@@ -45,6 +45,7 @@ export default function SubmitPromptPage() {
         prompt_text: "",
         model_compatibility: "",
         difficulty: "Beginner" as any,
+        is_private: false,
     });
 
     const [supabase] = useState(() => createClient());
@@ -147,32 +148,34 @@ export default function SubmitPromptPage() {
 
     if (!user) {
         return (
-            <div
-                className="max-w-2xl mx-auto py-20 text-center rounded-2xl border"
-                style={{
-                    borderColor: 'var(--border)',
-                    background: 'color-mix(in srgb, var(--surface), transparent 50%)',
-                    backdropFilter: 'blur(12px)'
-                }}
-            >
-                <div className="w-16 h-16 mx-auto mb-6 flex items-center justify-center rounded-full" style={{ background: 'var(--surface-2)', border: '1px solid var(--border)' }}>
-                    <LogIn className="h-6 w-6" style={{ color: 'var(--foreground-muted)' }} />
-                </div>
-                <div className="term-label mb-2 text-red-500">ACCESS DENIED</div>
-                <h2 className="text-2xl font-bold mb-3" style={{ color: 'var(--foreground)', letterSpacing: '-0.02em' }}>
-                    SIGN IN REQUIRED
-                </h2>
-                <p className="text-sm mb-10" style={{ color: 'var(--foreground-muted)' }}>
-                    You must be signed in with a Digit88 account to contribute to the prompt library.
-                </p>
-                <button
-                    onClick={handleLogin}
-                    className="flex lg:inline-flex items-center justify-center gap-2 px-8 py-3 text-xs font-bold tracking-widest uppercase"
-                    style={{ background: 'var(--primary)', color: '#0d0f0e' }}
+            <div className="min-h-[70vh] flex items-center justify-center px-4">
+                <div
+                    className="w-full max-w-2xl py-16 px-8 text-center rounded-3xl border animate-in fade-in zoom-in duration-300"
+                    style={{
+                        borderColor: 'var(--border)',
+                        background: 'color-mix(in srgb, var(--surface), transparent 40%)',
+                        backdropFilter: 'blur(16px)'
+                    }}
                 >
-                    <LogIn className="h-4 w-4" />
-                    SIGN IN WITH GOOGLE
-                </button>
+                    <div className="w-20 h-20 mx-auto mb-8 flex items-center justify-center rounded-full" style={{ background: 'var(--surface-2)', border: '1px solid var(--border)' }}>
+                        <LogIn className="h-8 w-8" style={{ color: 'var(--foreground-muted)' }} />
+                    </div>
+                    <div className="term-label mb-3 text-red-500 tracking-[0.2em]">ACCESS DENIED</div>
+                    <h2 className="text-3xl font-bold mb-4 tracking-tight uppercase" style={{ color: 'var(--foreground)' }}>
+                        SIGN IN REQUIRED
+                    </h2>
+                    <p className="text-sm mb-12 max-w-md mx-auto leading-relaxed" style={{ color: 'var(--foreground-muted)' }}>
+                        You must be signed in with a Digit88 account to contribute to the prompt library.
+                    </p>
+                    <button
+                        onClick={handleLogin}
+                        className="flex items-center gap-3 mx-auto px-10 py-4 text-xs font-bold tracking-[0.2em] uppercase transition-all hover:scale-105 active:scale-95"
+                        style={{ background: 'var(--primary)', color: '#0d0f0e' }}
+                    >
+                        <LogIn className="h-4 w-4" />
+                        SIGN IN WITH GOOGLE
+                    </button>
+                </div>
             </div>
         );
     }
@@ -180,7 +183,7 @@ export default function SubmitPromptPage() {
     if (submitted) {
         return (
             <div
-                className="max-w-2xl mx-auto py-20 text-center rounded-2xl border"
+                className="max-w-5xl w-full mx-auto py-32 text-center rounded-3xl border"
                 style={{
                     borderColor: 'var(--border)',
                     background: 'color-mix(in srgb, var(--surface), transparent 50%)',
@@ -188,12 +191,16 @@ export default function SubmitPromptPage() {
                 }}
             >
                 <CheckCircle2 className="h-12 w-12 mx-auto mb-6" style={{ color: 'var(--primary)' }} />
-                <div className="term-label mb-2">STATUS: PENDING REVIEW</div>
+                <div className="term-label mb-2">
+                    {formData.is_private ? "STATUS: SAVED" : "STATUS: PENDING REVIEW"}
+                </div>
                 <h2 className="text-2xl font-bold mb-3" style={{ color: 'var(--foreground)', letterSpacing: '-0.02em' }}>
-                    PROMPT SUBMITTED
+                    {formData.is_private ? "PRIVATE PROMPT SAVED" : "PROMPT SUBMITTED"}
                 </h2>
                 <p className="text-sm mb-10" style={{ color: 'var(--foreground-muted)' }}>
-                    Your prompt has been saved as a Draft and sent to the administrators for review.
+                    {formData.is_private
+                        ? "Your private prompt has been saved to your library and is only visible to you."
+                        : "Your prompt has been saved as a Draft and sent to the administrators for review."}
                 </p>
                 <div className="flex justify-center gap-3">
                     <button
@@ -207,6 +214,7 @@ export default function SubmitPromptPage() {
                                 prompt_text: "",
                                 model_compatibility: "",
                                 difficulty: "Beginner",
+                                is_private: false,
                             });
                         }}
                         className="px-5 py-2 text-xs font-semibold tracking-widest uppercase transition-colors"
@@ -228,7 +236,7 @@ export default function SubmitPromptPage() {
 
     return (
         <section
-            className="max-w-3xl mx-auto p-8 rounded-3xl border animate-slide-up"
+            className="max-w-5xl mx-auto p-10 md:p-12 rounded-3xl border animate-slide-up"
             style={{
                 borderColor: 'var(--border)',
                 background: 'color-mix(in srgb, var(--surface), transparent 50%)',
@@ -359,7 +367,19 @@ export default function SubmitPromptPage() {
                         />
                     </div>
 
-                    <div className="p-5 flex items-center justify-end gap-3">
+                    <div className="p-5 flex items-center justify-between gap-3">
+                        <label className="flex items-center gap-2 cursor-pointer group">
+                            <input
+                                type="checkbox"
+                                className="w-4 h-4 rounded"
+                                style={{ accentColor: 'var(--primary)', cursor: 'pointer' }}
+                                checked={formData.is_private}
+                                onChange={e => setFormData({ ...formData, is_private: e.target.checked })}
+                            />
+                            <span className="text-xs font-semibold uppercase tracking-widest text-[#a1a1aa] group-hover:text-[#fafafa] transition-colors">
+                                Save as Private Prompt
+                            </span>
+                        </label>
                         <button
                             type="submit"
                             disabled={submitting}
@@ -372,7 +392,7 @@ export default function SubmitPromptPage() {
                             }}
                         >
                             <Send className="h-3.5 w-3.5" />
-                            {submitting ? "SUBMITTING..." : "SUBMIT FOR REVIEW"}
+                            {submitting ? "SUBMITTING..." : (formData.is_private ? "SAVE PROMPT" : "SUBMIT FOR REVIEW")}
                         </button>
                     </div>
                 </div>

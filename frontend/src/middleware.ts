@@ -1,5 +1,5 @@
 import { type NextRequest } from "next/server";
-import { updateSession } from "./src/lib/supabase/middleware";
+import { updateSession } from "./lib/supabase/middleware";
 
 export async function middleware(request: NextRequest) {
     // This calls the "bouncer" code we just wrote

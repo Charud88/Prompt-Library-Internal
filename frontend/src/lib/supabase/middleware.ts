@@ -40,19 +40,16 @@ export async function updateSession(request: NextRequest) {
     // ----------------------------------------------------------------
     const url = request.nextUrl.clone();
 
-    // If there is no user and they are trying to go to /submit or /admin or /library
-    // We let the client-side handle the "Access Denied" UI instead of an aggressive redirect.
-    /*
-    if (
-        !user &&
-        (url.pathname.startsWith("/submit") ||
-            url.pathname.startsWith("/admin") ||
-            url.pathname.startsWith("/library"))
-    ) {
-        url.pathname = "/"; // Send them home (or eventually to a login page)
+    // Sensitive routes that require strict authentication redirect
+    const protectedPaths = ["/admin"];
+    const isProtectedPath = protectedPaths.some((path) => url.pathname.startsWith(path));
+
+    if (!user && isProtectedPath) {
+        // We let the client-side handle the "Access Denied" UI for specific interactive flows,
+        // but for deep links, we redirect them to home (which shows the hero + sign in).
+        url.pathname = "/";
         return NextResponse.redirect(url);
     }
-    */
 
     return supabaseResponse;
 }

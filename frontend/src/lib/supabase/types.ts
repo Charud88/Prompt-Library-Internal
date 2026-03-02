@@ -33,6 +33,7 @@ export interface Prompt {
     status: PromptStatus;
     version: string;
     owner_id: string;
+    is_private: boolean;
     created_at: string;
     updated_at: string;
     deleted_at: string | null;
@@ -70,11 +71,12 @@ export type Database = {
             };
             prompts: {
                 Row: Prompt;
-                Insert: Omit<Prompt, "id" | "created_at" | "updated_at" | "version" | "deleted_at" | "role" | "use_case"> & {
+                Insert: Omit<Prompt, "id" | "created_at" | "updated_at" | "version" | "deleted_at" | "role" | "use_case" | "is_private"> & {
                     version?: string;
                     deleted_at?: string | null;
                     role?: string | null;
                     use_case?: string | null;
+                    is_private?: boolean;
                 };
                 Update: Partial<Omit<Prompt, "id" | "owner_id" | "created_at">>;
             };
