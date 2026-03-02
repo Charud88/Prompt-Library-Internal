@@ -62,8 +62,12 @@ export async function DELETE(request: Request, context: { params: Promise<{ id: 
         return NextResponse.json({ error: "Only private prompts can be deleted permanently by users." }, { status: 403 });
     }
 
+    // Use service_role client to reliably bypass RLS for the hard delete
+    const { createServiceClient } = await import("@/lib/supabase/server");
+    const serviceClient = createServiceClient();
+
     // Perform hard delete
-    const { error: deleteError } = await supabase
+    const { error: deleteError } = await serviceClient
         .from("prompts")
         .delete()
         .eq("id", id);
